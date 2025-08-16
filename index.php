@@ -27,7 +27,6 @@
         <header>
             <h1>MelodyHub</h1>
             <p>Browse, manage, and play your audio files</p>
-            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.8;">Developed by Costin Stroie &lt;costinstroie@eridu.eu.org&gt;</p>
         </header>
 
         <div class="main-content">
