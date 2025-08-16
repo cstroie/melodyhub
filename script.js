@@ -633,3 +633,475 @@ function showNotification(message, type = 'success') {
         notificationEl.classList.add('hidden');
     }, 3000);
 }
+// Debug function to log messages to console
+function debugLog(message, data = null) {
+    console.log('[MelodyHub Debug]', message, data || '');
+}
+
+// DOM Elements
+const fileList = document.getElementById('fileList');
+const playlistItems = document.getElementById('playlistItems');
+const emptyPlaylistMessage = document.getElementById('emptyPlaylistMessage');
+const audioPlayer = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const currentTimeDisplay = document.getElementById('currentTime');
+const totalTimeDisplay = document.getElementById('totalTime');
+const progressContainer = document.getElementById('progressContainer');
+const progressBar = document.getElementById('progressBar');
+const volumeSlider = document.getElementById('volumeSlider');
+const breadcrumb = document.getElementById('breadcrumb');
+const clearBtn = document.getElementById('clearBtn');
+const importBtn = document.getElementById('importBtn');
+const exportBtn = document.getElementById('exportBtn');
+const notification = document.getElementById('notification');
+
+// State variables
+let currentPath = '';
+let playlist = [];
+let currentTrackIndex = -1;
+
+// Initialize the application
+debugLog('Initializing MelodyHub application');
+loadDirectory('');
+
+// Event Listeners
+playBtn.addEventListener('click', playTrack);
+pauseBtn.addEventListener('click', pauseTrack);
+prevBtn.addEventListener('click', playPreviousTrack);
+nextBtn.addEventListener('click', playNextTrack);
+clearBtn.addEventListener('click', clearPlaylist);
+importBtn.addEventListener('click', importPlaylist);
+exportBtn.addEventListener('click', exportPlaylist);
+
+// Audio player event listeners
+audioPlayer.addEventListener('timeupdate', updateProgress);
+audioPlayer.addEventListener('ended', playNextTrack);
+audioPlayer.addEventListener('loadedmetadata', updateTotalTime);
+
+// Volume control
+volumeSlider.addEventListener('input', () => {
+    audioPlayer.volume = volumeSlider.value;
+});
+
+// Progress bar click event
+progressContainer.addEventListener('click', setProgress);
+
+// Load directory contents
+function loadDirectory(path) {
+    debugLog('Loading directory:', path);
+    currentPath = path;
+    updateBreadcrumb(path);
+    
+    fetch(`api.php?action=list&path=${encodeURIComponent(path)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                debugLog('Error loading directory:', data.error);
+                showNotification('Error: ' + data.error, 'error');
+                return;
+            }
+            
+            debugLog('Directory loaded successfully, items found:', data.files.length);
+            displayFiles(data.files);
+        })
+        .catch(error => {
+            debugLog('Error fetching directory:', error);
+            showNotification('Error loading directory', 'error');
+        });
+}
+
+// Display files in the directory browser
+function displayFiles(files) {
+    debugLog('Displaying files in directory browser, count:', files.length);
+    fileList.innerHTML = '';
+    
+    files.forEach(file => {
+        const li = document.createElement('li');
+        li.className = 'file-item';
+        
+        if (file.type === 'directory') {
+            li.innerHTML = `
+                <span class="file-icon">📁</span>
+                <span class="file-name">${file.name}</span>
+            `;
+            li.addEventListener('click', () => {
+                debugLog('Navigating to directory:', file.path);
+                loadDirectory(file.path);
+            });
+        } else {
+            li.innerHTML = `
+                <span class="file-icon">🎵</span>
+                <span class="file-name">${file.name}</span>
+            `;
+            li.addEventListener('click', () => {
+                debugLog('Adding file to playlist:', file.path);
+                addToPlaylist(file.path, file.name);
+            });
+        }
+        
+        fileList.appendChild(li);
+    });
+}
+
+// Update breadcrumb navigation
+function updateBreadcrumb(path) {
+    debugLog('Updating breadcrumb for path:', path);
+    const parts = path ? path.split('/') : [];
+    breadcrumb.innerHTML = '<span class="breadcrumb-item" data-path="">Home</span>';
+    
+    let currentPath = '';
+    parts.forEach((part, index) => {
+        currentPath += (index > 0 ? '/' : '') + part;
+        const separator = document.createElement('span');
+        separator.textContent = ' / ';
+        breadcrumb.appendChild(separator);
+        
+        const item = document.createElement('span');
+        item.className = 'breadcrumb-item';
+        item.textContent = part;
+        item.dataset.path = currentPath;
+        item.addEventListener('click', () => {
+            debugLog('Breadcrumb navigation to:', currentPath);
+            loadDirectory(currentPath);
+        });
+        
+        breadcrumb.appendChild(item);
+    });
+}
+
+// Add file to playlist
+function addToPlaylist(filePath, fileName) {
+    debugLog('Adding to playlist:', { filePath, fileName });
+    playlist.push({ path: filePath, title: fileName });
+    updatePlaylistDisplay();
+    showNotification('Added to playlist: ' + fileName);
+}
+
+// Update playlist display
+function updatePlaylistDisplay() {
+    debugLog('Updating playlist display, items count:', playlist.length);
+    playlistItems.innerHTML = '';
+    
+    if (playlist.length === 0) {
+        emptyPlaylistMessage.style.display = 'block';
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+    }
+    
+    emptyPlaylistMessage.style.display = 'none';
+    
+    playlist.forEach((track, index) => {
+        const li = document.createElement('li');
+        li.className = 'playlist-item';
+        if (index === currentTrackIndex) {
+            li.classList.add('playing');
+        }
+        
+        li.innerHTML = `
+            <span class="track-title">${track.title}</span>
+            <button class="remove-btn" title="Remove">✕</button>
+        `;
+        
+        li.addEventListener('click', () => {
+            debugLog('Playing track from playlist, index:', index);
+            playTrackAtIndex(index);
+        });
+        
+        li.querySelector('.remove-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            debugLog('Removing track from playlist, index:', index);
+            removeFromPlaylist(index);
+        });
+        
+        playlistItems.appendChild(li);
+    });
+    
+    // Update button states
+    prevBtn.disabled = currentTrackIndex <= 0;
+    nextBtn.disabled = currentTrackIndex >= playlist.length - 1;
+}
+
+// Remove track from playlist
+function removeFromPlaylist(index) {
+    debugLog('Removing track at index:', index);
+    playlist.splice(index, 1);
+    
+    // Adjust current track index if necessary
+    if (index < currentTrackIndex) {
+        currentTrackIndex--;
+    } else if (index === currentTrackIndex) {
+        // If we removed the currently playing track
+        if (playlist.length > 0) {
+            // Play the next track or the previous one if at the end
+            if (currentTrackIndex < playlist.length) {
+                playTrackAtIndex(currentTrackIndex);
+            } else {
+                playTrackAtIndex(currentTrackIndex - 1);
+            }
+        } else {
+            // No more tracks, stop playback
+            stopTrack();
+            currentTrackIndex = -1;
+        }
+    }
+    
+    updatePlaylistDisplay();
+    showNotification('Removed from playlist');
+}
+
+// Play track at specific index
+function playTrackAtIndex(index) {
+    debugLog('Playing track at index:', index);
+    if (index < 0 || index >= playlist.length) return;
+    
+    currentTrackIndex = index;
+    const track = playlist[index];
+    
+    audioPlayer.src = `api.php?action=play&file=${encodeURIComponent(track.path)}`;
+    audioPlayer.play()
+        .then(() => {
+            debugLog('Track playback started:', track.title);
+            playBtn.disabled = true;
+            pauseBtn.disabled = false;
+            updatePlaylistDisplay();
+        })
+        .catch(error => {
+            debugLog('Error playing track:', error);
+            showNotification('Error playing track: ' + error.message, 'error');
+        });
+}
+
+// Play current track
+function playTrack() {
+    debugLog('Play button clicked');
+    if (playlist.length === 0) {
+        showNotification('Playlist is empty');
+        return;
+    }
+    
+    if (currentTrackIndex === -1) {
+        playTrackAtIndex(0);
+    } else {
+        audioPlayer.play()
+            .then(() => {
+                debugLog('Track playback resumed');
+                playBtn.disabled = true;
+                pauseBtn.disabled = false;
+            })
+            .catch(error => {
+                debugLog('Error resuming track:', error);
+                showNotification('Error playing track: ' + error.message, 'error');
+            });
+    }
+}
+
+// Pause current track
+function pauseTrack() {
+    debugLog('Pause button clicked');
+    audioPlayer.pause();
+    playBtn.disabled = false;
+    pauseBtn.disabled = true;
+    debugLog('Track playback paused');
+}
+
+// Stop current track
+function stopTrack() {
+    debugLog('Stopping track playback');
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+    playBtn.disabled = false;
+    pauseBtn.disabled = true;
+}
+
+// Play next track
+function playNextTrack() {
+    debugLog('Next track button clicked');
+    if (currentTrackIndex < playlist.length - 1) {
+        playTrackAtIndex(currentTrackIndex + 1);
+    }
+}
+
+// Play previous track
+function playPreviousTrack() {
+    debugLog('Previous track button clicked');
+    if (currentTrackIndex > 0) {
+        playTrackAtIndex(currentTrackIndex - 1);
+    }
+}
+
+// Update progress bar
+function updateProgress() {
+    const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+    progressBar.style.width = `${progressPercent}%`;
+    
+    // Update current time display
+    currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
+}
+
+// Update total time display
+function updateTotalTime() {
+    totalTimeDisplay.textContent = formatTime(audioPlayer.duration);
+}
+
+// Set progress when clicking on progress bar
+function setProgress(e) {
+    const width = this.clientWidth;
+    const clickX = e.offsetX;
+    const duration = audioPlayer.duration;
+    
+    audioPlayer.currentTime = (clickX / width) * duration;
+    debugLog('Progress bar clicked, setting time to:', audioPlayer.currentTime);
+}
+
+// Format time in MM:SS format
+function formatTime(seconds) {
+    if (isNaN(seconds)) return '0:00';
+    
+    const minutes = Math.floor(seconds / 60);
+    seconds = Math.floor(seconds % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+}
+
+// Clear playlist
+function clearPlaylist() {
+    debugLog('Clearing playlist');
+    if (playlist.length === 0) {
+        showNotification('Playlist is already empty');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to clear the playlist?')) {
+        stopTrack();
+        playlist = [];
+        currentTrackIndex = -1;
+        updatePlaylistDisplay();
+        showNotification('Playlist cleared');
+    }
+}
+
+// Import playlist
+function importPlaylist() {
+    debugLog('Import playlist button clicked');
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.m3u,.m3u8,.pls';
+    
+    fileInput.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        debugLog('Selected playlist file for import:', file.name);
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const content = event.target.result;
+                const extension = file.name.split('.').pop().toLowerCase();
+                let importedFiles = [];
+                
+                if (extension === 'm3u' || extension === 'm3u8') {
+                    importedFiles = parseM3U(content);
+                } else if (extension === 'pls') {
+                    importedFiles = parsePLS(content);
+                }
+                
+                debugLog('Parsed playlist, tracks count:', importedFiles.length);
+                if (importedFiles.length > 0) {
+                    playlist = importedFiles;
+                    currentTrackIndex = -1;
+                    updatePlaylistDisplay();
+                    showNotification(`Imported ${importedFiles.length} tracks`);
+                } else {
+                    showNotification('No valid tracks found in playlist', 'warning');
+                }
+            } catch (error) {
+                debugLog('Error importing playlist:', error);
+                showNotification('Error importing playlist: ' + error.message, 'error');
+            }
+        };
+        reader.readAsText(file);
+    };
+    
+    fileInput.click();
+}
+
+// Parse M3U/M3U8 playlist
+function parseM3U(content) {
+    debugLog('Parsing M3U playlist');
+    const lines = content.split('\n');
+    const files = [];
+    
+    lines.forEach(line => {
+        line = line.trim();
+        if (line && !line.startsWith('#')) {
+            files.push({
+                path: line,
+                title: line.split('/').pop()
+            });
+        }
+    });
+    
+    return files;
+}
+
+// Parse PLS playlist
+function parsePLS(content) {
+    debugLog('Parsing PLS playlist');
+    const lines = content.split('\n');
+    const files = [];
+    
+    lines.forEach(line => {
+        const match = line.match(/^File\d+=(.+)$/);
+        if (match) {
+            const path = match[1];
+            files.push({
+                path: path,
+                title: path.split('/').pop()
+            });
+        }
+    });
+    
+    return files;
+}
+
+// Export playlist
+function exportPlaylist() {
+    debugLog('Export playlist button clicked');
+    if (playlist.length === 0) {
+        showNotification('Playlist is empty');
+        return;
+    }
+    
+    let playlistContent = '#EXTM3U\n';
+    playlist.forEach(track => {
+        playlistContent += `${track.path}\n`;
+    });
+    
+    const blob = new Blob([playlistContent], { type: 'audio/x-mpegurl' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'playlist.m3u';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    debugLog('Playlist exported, tracks count:', playlist.length);
+    showNotification('Playlist exported');
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    debugLog('Showing notification:', { message, type });
+    notification.textContent = message;
+    notification.className = 'notification ' + type;
+    notification.classList.remove('hidden');
+    
+    setTimeout(() => {
+        notification.classList.add('hidden');
+    }, 3000);
+}
