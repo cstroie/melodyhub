@@ -1,4 +1,4 @@
-# PHP Audio Player
+# MelodyHub
 
 A responsive web-based audio player that allows browsing local directories, managing playlists, and playing audio files.
 
@@ -82,6 +82,10 @@ The player works in all modern browsers that support HTML5 audio:
 - Safari 4+
 - Edge 12+
 - Internet Explorer 9+
+
+## Author
+
+Costin Stroie <costinstroie@eridu.eu.org>
 
 ## License
 

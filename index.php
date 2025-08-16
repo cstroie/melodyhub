@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Player</title>
+    <title>MelodyHub - Audio Player</title>
     <style>
         * {
             box-sizing: border-box;
@@ -298,8 +298,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>Audio Player</h1>
+            <h1>MelodyHub</h1>
             <p>Browse, manage, and play your audio files</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.8;">Developed by Costin Stroie &lt;costinstroie@eridu.eu.org&gt;</p>
         </header>
 
         <div class="main-content">
