@@ -9,9 +9,7 @@ A responsive web-based audio player that allows browsing local directories, mana
 - **Playlist Management**:
   - Add individual audio files to playlist
   - Add entire playlists (M3U, M3U8, PLS formats)
-  - Reorder playlist items with drag and drop
   - Remove individual items
-  - Import/export playlists
   - Clear entire playlist
 - **Player Controls**:
   - Play/Pause
@@ -30,14 +28,28 @@ A responsive web-based audio player that allows browsing local directories, mana
 1. Clone or download this repository
 2. Place your audio files in the `audio` directory (create it if it doesn't exist)
 3. Ensure the web server has read permissions for the audio directory
-4. Access `index.php` through your web browser
+4. Configure the application by editing `config.php` (see Configuration section)
+5. Access `index.php` through your web browser
 
 ## Configuration
+
+The main configuration file is `config.php`. Before using the application, you need to configure it properly:
 
 1. Edit `config.php` and change the `$basePath` variable to point to your audio directory:
    ```php
    $basePath = __DIR__ . '/audio'; // Change this to your audio directory
    ```
+
+2. Make sure the path you specify exists and contains your audio files
+3. Ensure the web server has read permissions for this directory
+
+## API Endpoints
+
+The application uses the following PHP endpoints:
+
+- `api.php?action=list&path=PATH` - List directory contents
+- `api.php?action=play&file=FILE` - Play an audio file
+- `api.php?action=loadPlaylist&path=PATH` - Load a playlist file
 
 ## Usage
 
@@ -51,11 +63,8 @@ A responsive web-based audio player that allows browsing local directories, mana
    - Click "Add" next to playlist files (M3U, M3U8, PLS) to add all contained files
 
 3. **Managing Playlist**:
-   - Drag and drop items to reorder the playlist
    - Click "Remove" to delete individual items
    - Use "Clear Playlist" to remove all items
-   - Use "Import Playlist" to load an external playlist file
-   - Use "Export Playlist" to save the current playlist
 
 4. **Playing Audio**:
    - Click the "Play" button to start playback
