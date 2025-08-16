@@ -23,6 +23,7 @@
  */
 
 // Base path for audio files - change this to your audio directory
-$basePath = __DIR__ . '/audio';
+// Uses AUDIO_DIR environment variable if set, otherwise defaults to ./audio
+$basePath = getenv('AUDIO_DIR') ?: __DIR__ . '/audio';
 
 ?>
