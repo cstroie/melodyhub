@@ -228,7 +228,7 @@ function loadPlaylist() {
         foreach ($lines as $line) {
             // Trim whitespace and skip empty lines or comments
             $line = trim($line);
-            if ($line && !$line.startsWith('#')) {
+            if ($line && strpos($line, '#') !== 0) {
                 // Resolve relative paths based on playlist location
                 $filePath = dirname($file) . '/' . $line;
                 $files[] = [
