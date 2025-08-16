@@ -1,8 +1,23 @@
 <?php
+/**
+ * Audio Player API
+ * 
+ * This script provides backend functionality for the audio player web application.
+ * It handles directory listing, audio file streaming, and playlist loading.
+ * 
+ * Endpoints:
+ * - ?action=list&path=[path] - List directory contents
+ * - ?action=play&file=[file] - Stream an audio file
+ * - ?action=loadPlaylist&path=[file] - Load a playlist file
+ */
+
+// Set JSON response header
 header('Content-Type: application/json');
 
+// Get the requested action
 $action = $_GET['action'] ?? '';
 
+// Route to appropriate function based on action
 switch ($action) {
     case 'list':
         listDirectory();
@@ -18,31 +33,52 @@ switch ($action) {
         break;
 }
 
+/**
+ * List directory contents
+ * 
+ * This function returns a JSON array of files and directories in the specified path.
+ * It includes security checks to prevent directory traversal attacks.
+ * 
+ * @return void Outputs JSON response with file listing
+ */
 function listDirectory() {
-    $basePath = __DIR__ . '/audio'; // Change this to your audio directory
+    // Base path for audio files - change this to your audio directory
+    $basePath = __DIR__ . '/audio';
+    
+    // Get the requested path, default to empty string
     $path = $_GET['path'] ?? '';
     
     // Security check to prevent directory traversal
+    // realpath() resolves symbolic links and returns absolute path
+    // strpos() ensures the resolved path is within the base path
     $fullPath = realpath($basePath . '/' . $path);
     if (!$fullPath || strpos($fullPath, realpath($basePath)) !== 0) {
         echo json_encode(['error' => 'Invalid path']);
         return;
     }
     
+    // Check if the path is actually a directory
     if (!is_dir($fullPath)) {
         echo json_encode(['error' => 'Directory not found']);
         return;
     }
     
+    // Initialize files array
     $files = [];
+    
+    // Get directory contents
     $items = scandir($fullPath);
     
+    // Process each item in the directory
     foreach ($items as $item) {
+        // Skip current and parent directory references
         if ($item === '.' || $item === '..') continue;
         
+        // Build full path and relative path
         $itemPath = $fullPath . '/' . $item;
         $relativePath = $path ? $path . '/' . $item : $item;
         
+        // Check if item is a directory
         if (is_dir($itemPath)) {
             $files[] = [
                 'name' => $item,
@@ -50,6 +86,7 @@ function listDirectory() {
                 'path' => $relativePath
             ];
         } else {
+            // For files, extract extension for type identification
             $extension = strtolower(pathinfo($item, PATHINFO_EXTENSION));
             $files[] = [
                 'name' => $item,
@@ -60,19 +97,33 @@ function listDirectory() {
         }
     }
     
-    // Sort: directories first, then files
+    // Sort items: directories first, then files, both alphabetically
     usort($files, function($a, $b) {
+        // If both items are the same type, sort by name
         if ($a['type'] === $b['type']) {
             return strcmp($a['name'], $b['name']);
         }
+        // Directories come before files
         return $a['type'] === 'directory' ? -1 : 1;
     });
     
+    // Return JSON response with file list
     echo json_encode(['files' => $files]);
 }
 
+/**
+ * Stream an audio file
+ * 
+ * This function streams an audio file to the client with appropriate headers.
+ * It includes security checks to prevent unauthorized file access.
+ * 
+ * @return void Streams audio file content or returns 404 error
+ */
 function playAudio() {
-    $basePath = __DIR__ . '/audio'; // Change this to your audio directory
+    // Base path for audio files - change this to your audio directory
+    $basePath = __DIR__ . '/audio';
+    
+    // Get the requested file path
     $file = $_GET['file'] ?? '';
     
     // Security check to prevent directory traversal
@@ -83,13 +134,14 @@ function playAudio() {
         return;
     }
     
+    // Check if file exists
     if (!file_exists($fullPath)) {
         http_response_code(404);
         echo 'File not found';
         return;
     }
     
-    // Determine content type
+    // Determine content type based on file extension
     $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
     $mimeTypes = [
         'mp3' => 'audio/mpeg',
@@ -100,20 +152,32 @@ function playAudio() {
         'aac' => 'audio/aac'
     ];
     
+    // Default to MP3 if extension not found
     $contentType = $mimeTypes[$extension] ?? 'audio/mpeg';
     
-    // Set headers
+    // Set appropriate headers for audio streaming
     header('Content-Type: ' . $contentType);
     header('Content-Length: ' . filesize($fullPath));
     header('Accept-Ranges: bytes');
     
-    // Stream the file
+    // Stream the file content to the client
     readfile($fullPath);
     exit;
 }
 
+/**
+ * Load and parse a playlist file
+ * 
+ * This function loads and parses playlist files (M3U, M3U8, PLS) and returns
+ * a JSON array of the contained audio files.
+ * 
+ * @return void Outputs JSON response with playlist contents
+ */
 function loadPlaylist() {
-    $basePath = __DIR__ . '/audio'; // Change this to your audio directory
+    // Base path for audio files - change this to your audio directory
+    $basePath = __DIR__ . '/audio';
+    
+    // Get the requested playlist file path
     $file = $_GET['path'] ?? '';
     
     // Security check to prevent directory traversal
@@ -123,22 +187,32 @@ function loadPlaylist() {
         return;
     }
     
+    // Check if playlist file exists
     if (!file_exists($fullPath)) {
         echo json_encode(['error' => 'Playlist not found']);
         return;
     }
     
+    // Get file extension to determine parsing method
     $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+    
+    // Initialize array to hold playlist entries
     $files = [];
     
+    // Parse M3U/M3U8 playlist files
     if ($extension === 'm3u' || $extension === 'm3u8') {
+        // Read entire file content
         $content = file_get_contents($fullPath);
+        
+        // Split content into lines
         $lines = explode("\n", $content);
         
+        // Process each line
         foreach ($lines as $line) {
+            // Trim whitespace and skip empty lines or comments
             $line = trim($line);
             if ($line && !$line.startsWith('#')) {
-                // Resolve relative paths
+                // Resolve relative paths based on playlist location
                 $filePath = dirname($file) . '/' . $line;
                 $files[] = [
                     'path' => $filePath,
@@ -146,12 +220,20 @@ function loadPlaylist() {
                 ];
             }
         }
-    } elseif ($extension === 'pls') {
+    } 
+    // Parse PLS playlist files
+    elseif ($extension === 'pls') {
+        // Read entire file content
         $content = file_get_contents($fullPath);
+        
+        // Split content into lines
         $lines = explode("\n", $content);
         
+        // Process each line
         foreach ($lines as $line) {
+            // Match PLS file entries (File1=path, File2=path, etc.)
             if (preg_match('/^File\d+=(.+)$/', $line, $matches)) {
+                // Resolve relative paths based on playlist location
                 $filePath = dirname($file) . '/' . $matches[1];
                 $files[] = [
                     'path' => $filePath,
@@ -159,11 +241,14 @@ function loadPlaylist() {
                 ];
             }
         }
-    } else {
+    } 
+    // Unsupported playlist format
+    else {
         echo json_encode(['error' => 'Unsupported playlist format']);
         return;
     }
     
+    // Return JSON response with playlist contents
     echo json_encode(['files' => $files]);
 }
 ?>
