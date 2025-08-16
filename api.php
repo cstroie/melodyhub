@@ -107,12 +107,19 @@ function listDirectory() {
         } else {
             // For files, extract extension for type identification
             $extension = strtolower(pathinfo($item, PATHINFO_EXTENSION));
-            $files[] = [
-                'name' => $item,
-                'type' => 'file',
-                'extension' => $extension,
-                'path' => $relativePath
-            ];
+            
+            // Define supported audio extensions
+            $audioExtensions = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'];
+            
+            // Only include audio files and playlist files
+            if (in_array($extension, $audioExtensions) || in_array($extension, ['m3u', 'm3u8', 'pls'])) {
+                $files[] = [
+                    'name' => $item,
+                    'type' => 'file',
+                    'extension' => $extension,
+                    'path' => $relativePath
+                ];
+            }
         }
     }
     
