@@ -11,6 +11,9 @@
  * - ?action=loadPlaylist&path=[file] - Load a playlist file
  */
 
+// Include configuration file
+require_once 'config.php';
+
 // Set JSON response header
 header('Content-Type: application/json');
 
@@ -42,8 +45,7 @@ switch ($action) {
  * @return void Outputs JSON response with file listing
  */
 function listDirectory() {
-    // Base path for audio files - change this to your audio directory
-    $basePath = __DIR__ . '/audio';
+    global $basePath;
     
     // Get the requested path, default to empty string
     $path = $_GET['path'] ?? '';
@@ -120,8 +122,7 @@ function listDirectory() {
  * @return void Streams audio file content or returns 404 error
  */
 function playAudio() {
-    // Base path for audio files - change this to your audio directory
-    $basePath = __DIR__ . '/audio';
+    global $basePath;
     
     // Get the requested file path
     $file = $_GET['file'] ?? '';
@@ -174,8 +175,7 @@ function playAudio() {
  * @return void Outputs JSON response with playlist contents
  */
 function loadPlaylist() {
-    // Base path for audio files - change this to your audio directory
-    $basePath = __DIR__ . '/audio';
+    global $basePath;
     
     // Get the requested playlist file path
     $file = $_GET['path'] ?? '';

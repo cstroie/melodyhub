@@ -34,7 +34,7 @@ A responsive web-based audio player that allows browsing local directories, mana
 
 ## Configuration
 
-1. Edit `api.php` and change the `$basePath` variable to point to your audio directory:
+1. Edit `config.php` and change the `$basePath` variable to point to your audio directory:
    ```php
    $basePath = __DIR__ . '/audio'; // Change this to your audio directory
    ```
