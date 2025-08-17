@@ -236,9 +236,9 @@ function renderFileList(files) {
 	li.role = "grid";
 
         // Determine icon class based on file type
-        const iconClass = file.type === 'directory' ? 'folder-icon' : 
-                         AUDIO_EXTENSIONS.includes(file.extension) ? 'audio-icon' : 
-                         PLAYLIST_EXTENSIONS.includes(file.extension) ? 'playlist-icon' : '';
+        const iconClass = file.type === 'directory' ? 'folderIcon' : 
+                         AUDIO_EXTENSIONS.includes(file.extension) ? 'audioIcon' : 
+                         PLAYLIST_EXTENSIONS.includes(file.extension) ? 'playlistIcon' : '';
 
         // Determine icon character based on file type
         const icon = file.type === 'directory' ? '📁' : 
@@ -247,8 +247,8 @@ function renderFileList(files) {
 
         // Generate HTML for file item
         li.innerHTML = `
-            <span class="file-icon ${iconClass}">${icon}</span>
-            <span class="file-name" ${file.type === 'directory' ? `style="cursor: pointer; text-decoration: underline;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
+            <span class="fileIcon ${iconClass}">${icon}</span>
+            <span class="fileName" ${file.type === 'directory' ? `style="cursor: pointer; text-decoration: underline;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
                 ${file.type === 'directory' ? 
                     `<button class="outline" onclick="addDirectoryToPlaylist('${currentPath ? currentPath + '/' + file.name : file.name}')">Add All</button>` : 
                     `<button class="outline secondary" onclick="addToPlaylist('${file.name}', '${file.extension}')">Add</button>`
@@ -360,14 +360,14 @@ function renderPlaylist() {
     // Create list item for each playlist entry
     playlist.forEach((item, index) => {
         const li = document.createElement('li');
-        li.className = 'playlist-item grid';
+        li.className = 'playlistItem grid';
         li.draggable = true;
         li.dataset.index = index;
 
         // Generate HTML for playlist item
         li.innerHTML = `
-            <span class="item-number">${index + 1}.</span>
-            <span class="playlist-title" style="cursor: pointer; text-decoration: underline;" onclick="playTrack(${index})">${item.title}</span>
+            <span class="itemNumber">${index + 1}.</span>
+            <span class="playlistTitle" style="cursor: pointer; text-decoration: underline;" onclick="playTrack(${index})">${item.title}</span>
             <button class="secondary" onclick="removeFromPlaylist(${index})">Remove</button>
         `;
 

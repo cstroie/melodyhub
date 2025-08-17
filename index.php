@@ -53,7 +53,7 @@
 		    </div>
 		    <label>
 			Volume
-			<input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+			<input type="range" class="volumeSlider" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
 		    </label>
 		    </p>
 		</hgroup>
@@ -65,7 +65,7 @@
                 <nav aria-label="breadcrumb" id="breadcrumb">
                     <!-- Breadcrumb will be populated by JavaScript -->
                 </nav>
-                <ul class="file-list" id="fileList">
+                <ul class="fileList" id="fileList">
                     <!-- File list will be populated by JavaScript -->
                 </ul>
                 <div role="group">
@@ -74,7 +74,7 @@
             </article>
             <article>
                 <h3>Playlist</h3>
-                <ul class="play-list" id="playList">
+                <ul class="playList" id="playList">
                     <!-- Playlist items will be populated by JavaScript -->
                     <p id="emptyPlaylistMessage">Your playlist is empty. Add some audio files!</p>
                 </ul>

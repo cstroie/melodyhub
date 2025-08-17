@@ -8,11 +8,11 @@ header {
   border-radius: 8px;
 }
 
-.file-list, .play-list {
+.fileList, .playList {
   padding: 0;
 }
 
-.file-list li {
+.fileList li {
   padding: 0.75rem;
   border-bottom: 1px solid var(--border-color);
   display: grid;
@@ -20,7 +20,7 @@ header {
   align-items: center;
 }
 
-.play-list li {
+.playList li {
   padding: 0.75rem;
   border-bottom: 1px solid var(--border-color);
   display: grid;
@@ -28,21 +28,21 @@ header {
   align-items: center;
 }
 
-.file-list li:hover, .play-list li:hover {
+.fileList li:hover, .playList li:hover {
   background-color: var(--card-background-color);
 }
 
-.file-icon {
+.fileIcon {
   margin-right: 0.75rem;
   font-size: 1em;
 }
 
-.item-number {
+.itemNumber {
   margin-right: 0.75rem;
   font-weight: bold;
 }
 
-.file-list li button, .play-list li button {
+.fileList li button, .playList li button {
   padding: 0.25em;
 }
 
