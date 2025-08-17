@@ -230,8 +230,10 @@ function updateBreadcrumb() {
     // Build path for each component
     let current = '';
     paths.forEach((path, index) => {
+        // Escape single quotes in path for JavaScript onclick handler
+        const escapedPath = current.replace(/'/g, "\\'");
         current += (index > 0 ? '/' : '') + path;
-        breadcrumbHTML += `<li><a href="#" onclick="loadDirectory('${current}')">${path}</a></li>`;
+        breadcrumbHTML += `<li><a href="#" onclick="loadDirectory('${escapedPath}')">${path}</a></li>`;
     });
     breadcrumbEl.innerHTML = '<ul>' + breadcrumbHTML + '</ul>';
     // Save current path to localStorage
@@ -261,12 +263,17 @@ function renderFileList(files) {
                     PLAYLIST_EXTENSIONS.includes(file.extension) ? '📝' : '📄';
 
         // Generate HTML for file item
+        // Escape single quotes in file names for JavaScript onclick handlers
+        const escapedFileName = file.name.replace(/'/g, "\\'");
+        const fullPath = currentPath ? currentPath + '/' + file.name : file.name;
+        const escapedFullPath = fullPath.replace(/'/g, "\\'");
+        
         li.innerHTML = `
             <span class="fileIcon ${iconClass}">${icon}</span>
-            <span class="fileName" style="cursor: pointer;" ${file.type === 'directory' ? `onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : `onclick="addToPlaylist('${file.name}', '${file.extension}')" title="Add to playlist"`}>${file.name}</span>
+            <span class="fileName" style="cursor: pointer;" ${file.type === 'directory' ? `onclick="loadDirectory('${escapedFullPath}')"` : `onclick="addToPlaylist('${escapedFileName}', '${file.extension}')" title="Add to playlist"`}>${file.name}</span>
                 ${file.type === 'directory' ? 
-                    `<button class="outline" onclick="addDirectoryToPlaylist('${currentPath ? currentPath + '/' + file.name : file.name}')" title="Add All">➕➕</button>` : 
-                    `<button class="outline secondary" onclick="addToPlaylist('${file.name}', '${file.extension}')" title="Add">➕</button>`
+                    `<button class="outline" onclick="addDirectoryToPlaylist('${escapedFullPath}')" title="Add All">➕➕</button>` : 
+                    `<button class="outline secondary" onclick="addToPlaylist('${escapedFileName}', '${file.extension}')" title="Add">➕</button>`
                 }
         `;
 
