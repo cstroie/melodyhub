@@ -35,32 +35,28 @@
         <main>
 
 	<section>
-		<hgroup>
-		    <h2 id="nowPlaying">
+		<h2 id="nowPlaying">
 			<span id="nowPlayingTitle">--</span>
-		    </h2>
-		    <p>
-		    <div class="timeDisplay">
+		</h2>
+		<div class="timeDisplay">
 			<span id="currentTime" class="currentTime">0:00</span>
 			<span class="timeSeparator">/</span>
 			<span id="totalTime" class="totalTime">0:00</span>
-		    </div>
-		    <div id="progressContainer">
+		</div>
+		<div id="progressContainer">
 			<progress id="progressBar" value="0" max="100"></progress>
-		    </div>
-		    <audio id="audioPlayer"></audio>
-		    <div role="group">
+		</div>
+		<audio id="audioPlayer"></audio>
+		<div role="group">
 			<button id="prevBtn" title="Previous" disabled>⏮</button>
 			<button id="playBtn" title="Play">▶</button>
 			<button id="pauseBtn" title="Pause" disabled>⏸</button>
 			<button id="nextBtn" title="Next" disabled>⏭</button>
-		    </div>
-		    <label>
+		</div>
+		<label>
 			Volume
 			<input type="range" class="volumeSlider" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
-		    </label>
-		    </p>
-		</hgroup>
+		</label>
 	</section>
 
 	<section class="grid">
