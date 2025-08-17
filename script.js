@@ -310,7 +310,7 @@ function renderPlaylist() {
         // Generate HTML for playlist item
         li.innerHTML = `
             <span class="item-number">${index + 1}.</span>
-            <span class="playlist-title">${item.title}</span>
+            <span class="playlist-title" style="cursor: pointer; text-decoration: underline;" onclick="playTrack(${index})">${item.title}</span>
             <div class="playlist-controls">
                 <button class="btn btn-danger" onclick="removeFromPlaylist(${index})">Remove</button>
             </div>
@@ -567,6 +567,17 @@ function playPrevious() {
 
     // Cycle to last track if at beginning
     currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+    playAudio();
+}
+
+/**
+ * Play a specific track by index
+ * @param {number} index - Index of the track to play
+ */
+function playTrack(index) {
+    if (playlist.length === 0 || index < 0 || index >= playlist.length) return;
+    
+    currentTrackIndex = index;
     playAudio();
 }
 
