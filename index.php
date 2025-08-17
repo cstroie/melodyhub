@@ -49,6 +49,9 @@
                     Your playlist is empty. Add some audio files!
                 </div>
                 <div class="player-controls">
+                    <div class="now-playing" id="nowPlaying">
+                        Now Playing: <span id="nowPlayingTitle">Nothing</span>
+                    </div>
                     <div class="time-info">
                         <span id="currentTime">0:00</span>
                         <span id="totalTime">0:00</span>

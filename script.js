@@ -155,6 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load directory based on saved path or default to root
     loadDirectory(currentPath);
     setupEventListeners();
+    
+    // Initialize now playing display
+    updateNowPlaying();
 });
 
 // === EVENT LISTENERS ===
@@ -680,6 +683,18 @@ function setVolume() {
 }
 
 /**
+ * Update the now playing display
+ */
+function updateNowPlaying() {
+    const nowPlayingTitleEl = document.getElementById('nowPlayingTitle');
+    if (currentTrackIndex >= 0 && currentTrackIndex < playlist.length) {
+        nowPlayingTitleEl.textContent = playlist[currentTrackIndex].title;
+    } else {
+        nowPlayingTitleEl.textContent = 'Nothing';
+    }
+}
+
+/**
  * Update play/pause button states based on playback state
  */
 function updatePlayPauseButtons() {
@@ -687,6 +702,9 @@ function updatePlayPauseButtons() {
     pauseBtn.disabled = !isPlaying;
     prevBtn.disabled = playlist.length === 0;
     nextBtn.disabled = playlist.length === 0;
+    
+    // Update now playing display
+    updateNowPlaying();
 }
 
 /**
@@ -695,6 +713,9 @@ function updatePlayPauseButtons() {
 function updatePlayerControls() {
     prevBtn.disabled = playlist.length === 0;
     nextBtn.disabled = playlist.length === 0;
+    
+    // Update now playing display
+    updateNowPlaying();
 }
 
 /**
