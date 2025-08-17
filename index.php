@@ -37,13 +37,14 @@
 			<span id="nowPlayingTitle">--</span>
 		    </h2>
 		    <p>
-		    <label>
-			<span id="currentTime">0:00</span> / 
-			<span id="totalTime">0:00</span>
-			    <div id="progressContainer">
-				<progress id="progressBar" value="0" max="100"></progress>
-			    </div>
-		    </label>
+		    <div class="timeDisplay">
+			<span id="currentTime" class="currentTime">0:00</span>
+			<span class="timeSeparator">/</span>
+			<span id="totalTime" class="totalTime">0:00</span>
+		    </div>
+		    <div id="progressContainer">
+			<progress id="progressBar" value="0" max="100"></progress>
+		    </div>
 		    <audio id="audioPlayer"></audio>
 		    <div role="group">
 			<button id="prevBtn" title="Previous" disabled>⏮</button>
