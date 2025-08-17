@@ -20,8 +20,12 @@ const PLAYLIST_EXTENSIONS = ['m3u', 'm3u8', 'pls'];
 
 // === APPLICATION STATE ===
 /**
- * Application state
- * @type {object}
+ * Application state object that holds all the current state of the player
+ * @property {string} currentPath - Current directory path being browsed
+ * @property {Array} playlist - Array of playlist items
+ * @property {number} currentTrackIndex - Index of currently playing track
+ * @property {boolean} isPlaying - Whether audio is currently playing
+ * @property {number} volume - Current volume level (0.0 to 1.0)
  */
 const state = {
     currentPath: '',
@@ -31,7 +35,7 @@ const state = {
     volume: 0.5
 };
 
-// Shortcut references to state properties
+// Shortcut references to state properties for easier access
 let currentPath = state.currentPath;
 let playlist = state.playlist;
 let currentTrackIndex = state.currentTrackIndex;
@@ -39,6 +43,7 @@ let isPlaying = state.isPlaying;
 
 /**
  * Load playlist and current path from localStorage on page load
+ * This function restores the user's previous session
  */
 function loadFromStorage() {
     const savedPlaylist = localStorage.getItem('audioPlayerPlaylist');
@@ -121,6 +126,7 @@ let notificationEl;
 // === INITIALIZATION ===
 /**
  * Initialize the application when the DOM is loaded
+ * This is the main entry point of the application
  */
 document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
@@ -165,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // === EVENT LISTENERS ===
 /**
  * Set up all event listeners for UI elements
+ * This function connects user interactions to application functionality
  */
 function setupEventListeners() {
     playBtn.addEventListener('click', playAudio);
@@ -213,6 +220,7 @@ function loadDirectory(path) {
 
 /**
  * Update breadcrumb navigation based on current path
+ * This creates a navigable path showing where the user is in the directory structure
  */
 function updateBreadcrumb() {
     // Split path into components and filter out empty parts
@@ -347,6 +355,7 @@ function addDirectoryToPlaylist(dirname) {
 
 /**
  * Save playlist and current path to localStorage
+ * This preserves the user's session between page reloads
  */
 function saveToStorage() {
     localStorage.setItem('audioPlayerPlaylist', JSON.stringify(state.playlist));
@@ -357,6 +366,7 @@ function saveToStorage() {
 
 /**
  * Render the playlist in the UI
+ * This function updates the visual representation of the playlist
  */
 function renderPlaylist() {
     // Clear the playlist container first
@@ -429,6 +439,7 @@ function removeFromPlaylist(index) {
 
 /**
  * Clear the entire playlist
+ * This function asks for user confirmation before clearing
  */
 function clearPlaylist() {
     // Don't do anything if playlist is already empty
@@ -450,6 +461,7 @@ function clearPlaylist() {
 
 /**
  * Import a playlist from a file
+ * This function allows users to load M3U, M3U8, or PLS playlist files
  */
 function importPlaylist() {
     // Create a file input element
@@ -495,6 +507,7 @@ function importPlaylist() {
 
 /**
  * Export the current playlist to a file
+ * This function creates and downloads an M3U playlist file
  */
 function exportPlaylist() {
     // Don't export empty playlist
@@ -594,6 +607,7 @@ function handleDrop(e) {
 
 /**
  * Handle drag end event
+ * This function cleans up after a drag operation
  */
 function handleDragEnd() {
     const items = document.querySelectorAll('.playlist-item');
@@ -605,6 +619,7 @@ function handleDragEnd() {
 // === AUDIO PLAYER FUNCTIONS ===
 /**
  * Play the current track or first track if none playing
+ * This is the main function for starting audio playback
  */
 function playAudio() {
     // Don't play if playlist is empty
@@ -639,6 +654,7 @@ function playAudio() {
 
 /**
  * Pause audio playback
+ * This function pauses the currently playing audio
  */
 function pauseAudio() {
     audioPlayer.pause();
@@ -649,6 +665,7 @@ function pauseAudio() {
 
 /**
  * Play the previous track in the playlist
+ * This function cycles to the previous track or wraps to the end
  */
 function playPrevious() {
     if (playlist.length === 0) return;
@@ -673,6 +690,7 @@ function playTrack(index) {
 
 /**
  * Play the next track in the playlist
+ * This function cycles to the next track or wraps to the beginning
  */
 function playNext() {
     if (playlist.length === 0) return;
@@ -685,6 +703,7 @@ function playNext() {
 
 /**
  * Update progress bar during playback
+ * This function updates the UI with current playback position
  */
 function updateProgress() {
     const { currentTime, duration } = audioPlayer;
@@ -718,6 +737,7 @@ function setProgress(e) {
 
 /**
  * Set audio volume based on slider value
+ * This function updates the audio volume and saves it to state
  */
 function setVolume() {
     state.volume = volumeSlider.value;
@@ -727,6 +747,7 @@ function setVolume() {
 
 /**
  * Update the now playing display
+ * This function updates the UI with the currently playing track title
  */
 function updateNowPlaying() {
     const nowPlayingTitleEl = document.getElementById('nowPlayingTitle');
@@ -739,6 +760,7 @@ function updateNowPlaying() {
 
 /**
  * Update play/pause button states based on playback state
+ * This function enables/disables buttons based on current state
  */
 function updatePlayPauseButtons() {
     playBtn.disabled = isPlaying;
@@ -749,6 +771,7 @@ function updatePlayPauseButtons() {
 
 /**
  * Update player control states
+ * This function updates the state of navigation buttons
  */
 function updatePlayerControls() {
     prevBtn.disabled = playlist.length === 0;
