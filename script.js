@@ -176,6 +176,9 @@ function setupEventListeners() {
     importBtn.addEventListener('click', importPlaylist);
     exportBtn.addEventListener('click', exportPlaylist);
     clearBtn.addEventListener('click', clearPlaylist);
+    
+    // Set initial volume
+    setVolume();
 }
 
 // === DIRECTORY BROWSING FUNCTIONS ===

@@ -68,7 +68,7 @@
                     </div>
                     <div class="volume-container">
                         <span>🔈</span>
-                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
                         <span>🔊</span>
                     </div>
                 </div>
