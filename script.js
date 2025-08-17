@@ -351,6 +351,12 @@ function renderPlaylist() {
     // Clear the playlist container first
     playlistItemsEl.innerHTML = '';
 
+    // Show/hide empty playlist message
+    const emptyMessage = document.getElementById('emptyPlaylistMessage');
+    if (emptyMessage) {
+        emptyMessage.style.display = playlist.length === 0 ? 'block' : 'none';
+    }
+
     // Create list item for each playlist entry
     playlist.forEach((item, index) => {
         const li = document.createElement('li');

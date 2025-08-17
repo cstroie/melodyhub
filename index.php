@@ -38,7 +38,7 @@
 		    </h2>
 		    <p>
 		    <label>
-			<span id="currentTime">0:00</span>
+			<span id="currentTime">0:00</span> / 
 			<span id="totalTime">0:00</span>
 			    <div id="progressContainer">
 				<progress id="progressBar" value="0" max="100"></progress>
@@ -76,7 +76,7 @@
                 <h3>Playlist</h3>
                 <ul class="play-list" id="playList">
                     <!-- Playlist items will be populated by JavaScript -->
-                    <p>Your playlist is empty. Add some audio files!</p>
+                    <p id="emptyPlaylistMessage">Your playlist is empty. Add some audio files!</p>
                 </ul>
                 <div role="group">
                     <button id="importBtn">Import</button>
