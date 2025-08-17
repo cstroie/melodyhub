@@ -8,14 +8,6 @@ header {
   border-radius: 8px;
 }
 
-#fileListDIS, #playlistItemsDIS {
-  max-height: 400px;
-  overflow-y: auto;
-  background-color: var(--card-background-color);
-  border-radius: 8px;
-  padding: 0.5rem;
-}
-
 .file-list, .play-list {
   padding: 0;
 }
