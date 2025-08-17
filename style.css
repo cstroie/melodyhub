@@ -1,0 +1,83 @@
+/* Custom styles that complement PicoCSS */
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--card-background-color);
+  border-radius: 8px;
+}
+
+#fileListDIS, #playlistItemsDIS {
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(--card-background-color);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.file-list, .play-list {
+  padding: 0;
+}
+
+.file-list li {
+  --padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  display: grid;
+  grid-template-columns: 2rem 1fr 4rem;
+  --align-items: center;
+}
+
+.play-list li {
+  --padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  display: grid;
+  grid-template-columns: 3rem 1fr 6rem;
+  --align-items: center;
+}
+
+.file-item:hover, .playlist-item:hover {
+  background-color: var(--card-background-color);
+}
+
+.file-icon {
+  --margin-right: 0.75rem;
+  font-size: 1em;
+}
+
+.item-number {
+  --margin-right: 0.75rem;
+  font-weight: bold;
+}
+
+.file-list li button, .play-list li button {
+  padding: 0.25em;
+}
+
+.time-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.9em;
+  color: #9e9e9e;
+}
+
+.hidden {
+  display: none;
+}
+
+.notification {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  padding: 1rem;
+  border-radius: 8px;
+  color: #121212;
+  background: #4caf50;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+
+.notification.error {
+  background: #f44336;
+}

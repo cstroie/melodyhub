@@ -74,9 +74,6 @@ let fileListEl;
 /** @type {HTMLElement} Playlist items container */
 let playlistItemsEl;
 
-/** @type {HTMLElement} Empty playlist message element */
-let emptyPlaylistMessageEl;
-
 /** @type {HTMLAudioElement} Audio player element */
 let audioPlayer;
 
@@ -127,8 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
     breadcrumbEl = document.getElementById('breadcrumb');
     fileListEl = document.getElementById('fileList');
-    playlistItemsEl = document.getElementById('playlistItems');
-    emptyPlaylistMessageEl = document.getElementById('emptyPlaylistMessage');
+    playlistItemsEl = document.getElementById('playList');
     audioPlayer = document.getElementById('audioPlayer');
     playBtn = document.getElementById('playBtn');
     pauseBtn = document.getElementById('pauseBtn');
@@ -215,19 +211,15 @@ function loadDirectory(path) {
 function updateBreadcrumb() {
     // Split path into components and filter out empty parts
     const paths = currentPath.split('/').filter(p => p);
-
     // Start with home link
-    let breadcrumbHTML = '<a href="#" onclick="loadDirectory(\'\')">Home</a>';
-
+    let breadcrumbHTML = '<li><a href="#" onclick="loadDirectory(\'\')">Home</a></li>';
     // Build path for each component
     let current = '';
     paths.forEach((path, index) => {
         current += (index > 0 ? '/' : '') + path;
-        breadcrumbHTML += ` > <a href="#" onclick="loadDirectory('${current}')">${path}</a>`;
+        breadcrumbHTML += `<li><a href="#" onclick="loadDirectory('${current}')">${path}</a></li>`;
     });
-
-    breadcrumbEl.innerHTML = breadcrumbHTML;
-    
+    breadcrumbEl.innerHTML = '<ul>' + breadcrumbHTML + '</ul>';
     // Save current path to localStorage
     saveToStorage();
 }
@@ -241,7 +233,7 @@ function renderFileList(files) {
 
     files.forEach(file => {
         const li = document.createElement('li');
-        li.className = 'file-item';
+	li.role = "grid";
 
         // Determine icon class based on file type
         const iconClass = file.type === 'directory' ? 'folder-icon' : 
@@ -257,12 +249,10 @@ function renderFileList(files) {
         li.innerHTML = `
             <span class="file-icon ${iconClass}">${icon}</span>
             <span class="file-name" ${file.type === 'directory' ? `style="cursor: pointer; text-decoration: underline;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
-            <div class="file-actions">
                 ${file.type === 'directory' ? 
-                    `<button class="btn btn-success" onclick="addDirectoryToPlaylist('${file.name}')">Add All</button>` : 
-                    `<button class="btn btn-success" onclick="addToPlaylist('${file.name}', '${file.extension}')">Add</button>`
+                    `<button class="outline" onclick="addDirectoryToPlaylist('${file.name}')">Add All</button>` : 
+                    `<button class="outline secondary" onclick="addToPlaylist('${file.name}', '${file.extension}')">Add</button>`
                 }
-            </div>
         `;
 
         fileListEl.appendChild(li);
@@ -358,13 +348,10 @@ function saveToStorage() {
  * Render the playlist in the UI
  */
 function renderPlaylist() {
-    playlistItemsEl.innerHTML = '';
-    emptyPlaylistMessageEl.classList.toggle('hidden', playlist.length > 0);
-
     // Create list item for each playlist entry
     playlist.forEach((item, index) => {
         const li = document.createElement('li');
-        li.className = 'playlist-item';
+        li.className = 'playlist-item grid';
         li.draggable = true;
         li.dataset.index = index;
 
@@ -372,9 +359,7 @@ function renderPlaylist() {
         li.innerHTML = `
             <span class="item-number">${index + 1}.</span>
             <span class="playlist-title" style="cursor: pointer; text-decoration: underline;" onclick="playTrack(${index})">${item.title}</span>
-            <div class="playlist-controls">
-                <button class="btn btn-danger" onclick="removeFromPlaylist(${index})">Remove</button>
-            </div>
+            <button class="secondary" onclick="removeFromPlaylist(${index})">Remove</button>
         `;
 
         // Add drag and drop event listeners
@@ -669,7 +654,7 @@ function updateProgress() {
 
     // Calculate progress percentage
     const progressPercent = (currentTime / duration) * 100;
-    progressBar.style.width = `${progressPercent}%`;
+    progressBar.value = `${progressPercent}`;
 
     // Update time displays
     currentTimeEl.textContent = formatTime(currentTime);
@@ -707,7 +692,7 @@ function updateNowPlaying() {
     if (currentTrackIndex >= 0 && currentTrackIndex < playlist.length) {
         nowPlayingTitleEl.textContent = playlist[currentTrackIndex].title;
     } else {
-        nowPlayingTitleEl.textContent = 'Nothing';
+        nowPlayingTitleEl.textContent = 'Paused';
     }
 }
 

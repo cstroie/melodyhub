@@ -23,72 +23,73 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <main class="container">
+    <body class="container-fluid">
         <header>
             <h1>MelodyHub</h1>
             <p>Browse, manage, and play your audio files</p>
         </header>
+                
+        <main>
 
-        <div class="grid">
-            <section>
-                <h2>Directory Browser</h2>
-                <nav aria-label="Breadcrumb" id="breadcrumb">
+	<section>
+		<hgroup>
+		    <h2 id="nowPlaying">
+			<span id="nowPlayingTitle">--</span>
+		    </h2>
+		    <p>
+		    <label>
+			<span id="currentTime">0:00</span>
+			<span id="totalTime">0:00</span>
+			    <div id="progressContainer">
+				<progress id="progressBar" value="0" max="100"></progress>
+			    </div>
+		    </label>
+		    <audio id="audioPlayer"></audio>
+		    <div role="group">
+			<button id="prevBtn" title="Previous" disabled>⏮</button>
+			<button id="playBtn" title="Play">▶</button>
+			<button id="pauseBtn" title="Pause" disabled>⏸</button>
+			<button id="nextBtn" title="Next" disabled>⏭</button>
+		    </div>
+		    <label>
+			Volume
+			<input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+		    </label>
+		    </p>
+		</hgroup>
+	</section>
+
+	<section class="grid">
+            <article>
+                <h3>Directory Browser</h3>
+                <nav aria-label="breadcrumb" id="breadcrumb">
                     <!-- Breadcrumb will be populated by JavaScript -->
-                </div>
-                <div class="directory-controls">
-                    <button class="btn btn-success" id="addAllBtn">Add All Files in Current Directory</button>
-                </div>
+                </nav>
                 <ul class="file-list" id="fileList">
                     <!-- File list will be populated by JavaScript -->
                 </ul>
-            </section>
-
-            <section>
-                <h2>Playlist</h2>
-                <ul id="playlistItems">
+                <div role="group">
+                    <button class="secondary" id="addAllBtn">Add All Files in Current Directory</button>
+                </div>
+            </article>
+            <article>
+                <h3>Playlist</h3>
+                <ul class="play-list" id="playList">
                     <!-- Playlist items will be populated by JavaScript -->
-                </ul>
-                <div id="emptyPlaylistMessage">
                     <p>Your playlist is empty. Add some audio files!</p>
+                </ul>
+                <div role="group">
+                    <button id="importBtn">Import</button>
+                    <button id="exportBtn">Export</button>
+                    <button id="clearBtn" type="reset">Clear</button>
                 </div>
-                
-                <div class="player-controls">
-                    <div class="now-playing" id="nowPlaying">
-                        Now Playing: <span id="nowPlayingTitle">Nothing</span>
-                    </div>
-                    <div class="time-info">
-                        <span id="currentTime">0:00</span>
-                        <span id="totalTime">0:00</span>
-                    </div>
-                    <div id="progressContainer">
-                        <div class="progress-bar" id="progressBar"></div>
-                    </div>
-                    <audio id="audioPlayer"></audio>
-                    <div class="grid">
-                        <button id="prevBtn" title="Previous" disabled>⏮</button>
-                        <button id="playBtn" title="Play">▶</button>
-                        <button id="pauseBtn" title="Pause" disabled>⏸</button>
-                        <button id="nextBtn" title="Next" disabled>⏭</button>
-                    </div>
-                    <div class="volume-container">
-                        <span>🔈</span>
-                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
-                        <span>🔊</span>
-                    </div>
-                </div>
-                
-                <div class="grid">
-                    <button id="importBtn">Import Playlist</button>
-                    <button id="exportBtn">Export Playlist</button>
-                    <button id="clearBtn">Clear Playlist</button>
-                </div>
-            </section>
-        </div>
-    </main>
+            </article>
+        </section>
 
-    <div id="notification" class="notification hidden"></div>
+	</main>
 
-    <script src="script.js"></script>
-</body>
+        <div id="notification" class="notification hidden"></div>
+
+        <script src="script.js"></script>
+    </body>
 </html>
