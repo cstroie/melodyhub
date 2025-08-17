@@ -209,7 +209,7 @@ function renderFileList(files) {
         // Generate HTML for file item
         li.innerHTML = `
             <span class="file-icon ${iconClass}">${icon}</span>
-            <span class="file-name">${file.name}</span>
+            <span class="file-name" ${file.type === 'directory' ? `style="cursor: pointer; text-decoration: underline;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
             <div class="file-actions">
                 ${file.type === 'directory' ? 
                     `<button class="btn btn-primary" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')">Open</button>
