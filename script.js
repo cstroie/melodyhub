@@ -251,7 +251,7 @@ function renderFileList(files) {
             <span class="fileName" ${file.type === 'directory' ? `style="cursor: pointer; text-decoration: underline;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
                 ${file.type === 'directory' ? 
                     `<button class="outline" onclick="addDirectoryToPlaylist('${currentPath ? currentPath + '/' + file.name : file.name}')">Add All</button>` : 
-                    `<button class="outline secondary" onclick="addToPlaylist('${file.name}', '${file.extension}')">Add</button>`
+                    `<button class="outline secondary" onclick="addToPlaylist('${file.name}', '${file.extension}')" title="Add">+</button>`
                 }
         `;
 
@@ -368,7 +368,7 @@ function renderPlaylist() {
         li.innerHTML = `
             <span class="itemNumber">${index + 1}.</span>
             <span class="playlistTitle" style="cursor: pointer; text-decoration: underline;" onclick="playTrack(${index})">${item.title}</span>
-            <button class="secondary" onclick="removeFromPlaylist(${index})">Remove</button>
+            <button class="secondary" onclick="removeFromPlaylist(${index})" title="Remove">🗑️</button>
         `;
 
         // Add drag and drop event listeners
