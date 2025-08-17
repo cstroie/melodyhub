@@ -348,6 +348,9 @@ function saveToStorage() {
  * Render the playlist in the UI
  */
 function renderPlaylist() {
+    // Clear the playlist container first
+    playlistItemsEl.innerHTML = '';
+
     // Create list item for each playlist entry
     playlist.forEach((item, index) => {
         const li = document.createElement('li');
