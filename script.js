@@ -351,34 +351,33 @@ function renderPlaylist() {
     // Clear the playlist container first
     playlistItemsEl.innerHTML = '';
 
-    // Show/hide empty playlist message
-    const emptyMessage = document.getElementById('emptyPlaylistMessage');
-    if (emptyMessage) {
-        emptyMessage.style.display = playlist.length === 0 ? 'block' : 'none';
+    // If playlist is empty, show the empty message
+    if (playlist.length === 0) {
+        playlistItemsEl.innerHTML = '<p id="emptyPlaylistMessage">Your playlist is empty. Add some audio files!</p>';
+    } else {
+        // Create list item for each playlist entry
+        playlist.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.className = 'playlistItem grid';
+            li.draggable = true;
+            li.dataset.index = index;
+
+            // Generate HTML for playlist item
+            li.innerHTML = `
+                <span class="itemNumber">${index + 1}.</span>
+                <span class="playlistTitle" style="cursor: pointer; text-decoration: underline;" onclick="playTrack(${index})">${item.title}</span>
+                <button class="secondary" onclick="removeFromPlaylist(${index})" title="Remove">🗑️</button>
+            `;
+
+            // Add drag and drop event listeners
+            li.addEventListener('dragstart', handleDragStart);
+            li.addEventListener('dragover', handleDragOver);
+            li.addEventListener('drop', handleDrop);
+            li.addEventListener('dragend', handleDragEnd);
+
+            playlistItemsEl.appendChild(li);
+        });
     }
-
-    // Create list item for each playlist entry
-    playlist.forEach((item, index) => {
-        const li = document.createElement('li');
-        li.className = 'playlistItem grid';
-        li.draggable = true;
-        li.dataset.index = index;
-
-        // Generate HTML for playlist item
-        li.innerHTML = `
-            <span class="itemNumber">${index + 1}.</span>
-            <span class="playlistTitle" style="cursor: pointer; text-decoration: underline;" onclick="playTrack(${index})">${item.title}</span>
-            <button class="secondary" onclick="removeFromPlaylist(${index})" title="Remove">🗑️</button>
-        `;
-
-        // Add drag and drop event listeners
-        li.addEventListener('dragstart', handleDragStart);
-        li.addEventListener('dragover', handleDragOver);
-        li.addEventListener('drop', handleDrop);
-        li.addEventListener('dragend', handleDragEnd);
-
-        playlistItemsEl.appendChild(li);
-    });
 
     updatePlayerControls();
     
