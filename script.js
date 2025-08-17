@@ -20,28 +20,22 @@ const PLAYLIST_EXTENSIONS = ['m3u', 'm3u8', 'pls'];
 
 // === APPLICATION STATE ===
 /**
- * Current directory path being browsed
- * @type {string}
+ * Application state
+ * @type {object}
  */
-let currentPath = '';
+const state = {
+    currentPath: '',
+    playlist: [],
+    currentTrackIndex: -1,
+    isPlaying: false,
+    volume: 0.5
+};
 
-/**
- * Array of playlist items
- * @type {Array<{title: string, path: string}>}
- */
-let playlist = [];
-
-/**
- * Index of currently playing track in playlist
- * @type {number}
- */
-let currentTrackIndex = -1;
-
-/**
- * Playback state
- * @type {boolean}
- */
-let isPlaying = false;
+// Shortcut references to state properties
+let currentPath = state.currentPath;
+let playlist = state.playlist;
+let currentTrackIndex = state.currentTrackIndex;
+let isPlaying = state.isPlaying;
 
 /**
  * Load playlist and current path from localStorage on page load
@@ -50,17 +44,25 @@ function loadFromStorage() {
     const savedPlaylist = localStorage.getItem('audioPlayerPlaylist');
     const savedTrackIndex = localStorage.getItem('audioPlayerCurrentTrackIndex');
     const savedPath = localStorage.getItem('audioPlayerCurrentPath');
+    const savedVolume = localStorage.getItem('audioPlayerVolume');
     
     if (savedPlaylist) {
-        playlist = JSON.parse(savedPlaylist);
+        state.playlist = JSON.parse(savedPlaylist);
+        playlist = state.playlist;
     }
     
     if (savedTrackIndex !== null) {
-        currentTrackIndex = parseInt(savedTrackIndex);
+        state.currentTrackIndex = parseInt(savedTrackIndex);
+        currentTrackIndex = state.currentTrackIndex;
     }
     
     if (savedPath !== null) {
-        currentPath = savedPath;
+        state.currentPath = savedPath;
+        currentPath = state.currentPath;
+    }
+    
+    if (savedVolume !== null) {
+        state.volume = parseFloat(savedVolume);
     }
 }
 
@@ -143,6 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load data from localStorage
     loadFromStorage();
     
+    // Set volume from state
+    volumeSlider.value = state.volume;
+    setVolume();
+    
     // Render playlist if it was loaded from storage
     if (playlist.length > 0) {
         renderPlaylist();
@@ -221,6 +227,7 @@ function updateBreadcrumb() {
     });
     breadcrumbEl.innerHTML = '<ul>' + breadcrumbHTML + '</ul>';
     // Save current path to localStorage
+    state.currentPath = currentPath;
     saveToStorage();
 }
 
@@ -274,11 +281,12 @@ function addToPlaylist(filename, extension) {
             .then(data => {
                 // Add each file in the playlist to our playlist
                 data.files.forEach(file => {
-                    playlist.push({
+                    state.playlist.push({
                         title: file.title || file.path.split('/').pop(),
                         path: file.path
                     });
                 });
+                playlist = state.playlist;
                 renderPlaylist();
                 showNotification(`Added ${data.files.length} tracks from playlist`);
             })
@@ -288,10 +296,11 @@ function addToPlaylist(filename, extension) {
     } else {
         // Add single audio file to playlist
         const fullPath = currentPath ? currentPath + '/' + filename : filename;
-        playlist.push({
+        state.playlist.push({
             title: filename,
             path: fullPath
         });
+        playlist = state.playlist;
         renderPlaylist();
         showNotification('Added to playlist: ' + filename);
     }
@@ -321,11 +330,12 @@ function addDirectoryToPlaylist(dirname) {
             
             // Add each file to our playlist
             data.files.forEach(file => {
-                playlist.push({
+                state.playlist.push({
                     title: file.name,
                     path: file.path
                 });
             });
+            playlist = state.playlist;
             
             renderPlaylist();
             showNotification(`Added ${data.files.length} tracks from directory`);
@@ -339,9 +349,10 @@ function addDirectoryToPlaylist(dirname) {
  * Save playlist and current path to localStorage
  */
 function saveToStorage() {
-    localStorage.setItem('audioPlayerPlaylist', JSON.stringify(playlist));
-    localStorage.setItem('audioPlayerCurrentTrackIndex', currentTrackIndex.toString());
-    localStorage.setItem('audioPlayerCurrentPath', currentPath);
+    localStorage.setItem('audioPlayerPlaylist', JSON.stringify(state.playlist));
+    localStorage.setItem('audioPlayerCurrentTrackIndex', state.currentTrackIndex.toString());
+    localStorage.setItem('audioPlayerCurrentPath', state.currentPath);
+    localStorage.setItem('audioPlayerVolume', state.volume.toString());
 }
 
 /**
@@ -391,18 +402,21 @@ function renderPlaylist() {
  */
 function removeFromPlaylist(index) {
     // Remove item from playlist array
-    playlist.splice(index, 1);
+    state.playlist.splice(index, 1);
+    playlist = state.playlist;
 
     // If we removed the currently playing track
-    if (currentTrackIndex === index) {
-        currentTrackIndex = -1;
+    if (state.currentTrackIndex === index) {
+        state.currentTrackIndex = -1;
+        currentTrackIndex = state.currentTrackIndex;
         audioPlayer.src = '';
         isPlaying = false;
         updatePlayPauseButtons();
     } 
     // If we removed a track before the current one, adjust index
-    else if (currentTrackIndex > index) {
-        currentTrackIndex--;
+    else if (state.currentTrackIndex > index) {
+        state.currentTrackIndex--;
+        currentTrackIndex = state.currentTrackIndex;
     }
 
     renderPlaylist();
@@ -418,8 +432,10 @@ function clearPlaylist() {
 
     // Confirm with user before clearing
     if (confirm('Are you sure you want to clear the entire playlist?')) {
-        playlist = [];
-        currentTrackIndex = -1;
+        state.playlist = [];
+        playlist = state.playlist;
+        state.currentTrackIndex = -1;
+        currentTrackIndex = state.currentTrackIndex;
         audioPlayer.src = '';
         isPlaying = false;
         renderPlaylist();
@@ -453,12 +469,13 @@ function importPlaylist() {
                 // Add each line as a playlist item
                 lines.forEach(line => {
                     if (line.trim()) {
-                        playlist.push({
+                        state.playlist.push({
                             title: line.split('/').pop(),
                             path: line.trim()
                         });
                     }
                 });
+                playlist = state.playlist;
 
                 renderPlaylist();
                 showNotification(`Imported ${lines.length} tracks`);
@@ -549,16 +566,20 @@ function handleDrop(e) {
         const destIndex = parseInt(this.dataset.index);
 
         // Reorder playlist by removing and reinserting item
-        const item = playlist.splice(srcIndex, 1)[0];
-        playlist.splice(destIndex, 0, item);
+        const item = state.playlist.splice(srcIndex, 1)[0];
+        state.playlist.splice(destIndex, 0, item);
+        playlist = state.playlist;
 
         // Update current track index if needed
-        if (currentTrackIndex === srcIndex) {
-            currentTrackIndex = destIndex;
-        } else if (srcIndex < currentTrackIndex && destIndex >= currentTrackIndex) {
-            currentTrackIndex--;
-        } else if (srcIndex > currentTrackIndex && destIndex <= currentTrackIndex) {
-            currentTrackIndex++;
+        if (state.currentTrackIndex === srcIndex) {
+            state.currentTrackIndex = destIndex;
+            currentTrackIndex = state.currentTrackIndex;
+        } else if (srcIndex < state.currentTrackIndex && destIndex >= state.currentTrackIndex) {
+            state.currentTrackIndex--;
+            currentTrackIndex = state.currentTrackIndex;
+        } else if (srcIndex > state.currentTrackIndex && destIndex <= state.currentTrackIndex) {
+            state.currentTrackIndex++;
+            currentTrackIndex = state.currentTrackIndex;
         }
 
         renderPlaylist();
@@ -591,6 +612,7 @@ function playAudio() {
     // Start at first track if no track is currently selected
     if (currentTrackIndex === -1) {
         currentTrackIndex = 0;
+        state.currentTrackIndex = currentTrackIndex;
     }
 
     // Get current track and set audio source
@@ -599,6 +621,7 @@ function playAudio() {
     audioPlayer.play()
         .then(() => {
             isPlaying = true;
+            state.isPlaying = isPlaying;
             updatePlayPauseButtons();
             updateNowPlaying(); // Update now playing display
             showNotification('Now playing: ' + track.title);
@@ -616,6 +639,7 @@ function playAudio() {
 function pauseAudio() {
     audioPlayer.pause();
     isPlaying = false;
+    state.isPlaying = isPlaying;
     updatePlayPauseButtons();
 }
 
@@ -627,6 +651,7 @@ function playPrevious() {
 
     // Cycle to last track if at beginning
     currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+    state.currentTrackIndex = currentTrackIndex;
     playAudio();
 }
 
@@ -638,6 +663,7 @@ function playTrack(index) {
     if (playlist.length === 0 || index < 0 || index >= playlist.length) return;
     
     currentTrackIndex = index;
+    state.currentTrackIndex = currentTrackIndex;
     playAudio();
 }
 
@@ -649,6 +675,7 @@ function playNext() {
 
     // Cycle to first track if at end
     currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+    state.currentTrackIndex = currentTrackIndex;
     playAudio();
 }
 
