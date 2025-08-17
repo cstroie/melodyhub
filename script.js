@@ -255,7 +255,7 @@ function renderFileList(files) {
         // Generate HTML for file item
         li.innerHTML = `
             <span class="fileIcon ${iconClass}">${icon}</span>
-            <span class="fileName" ${file.type === 'directory' ? `style="cursor: pointer;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
+            <span class="fileName" style="cursor: pointer;" ${file.type === 'directory' ? `onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : `onclick="addToPlaylist('${file.name}', '${file.extension}')" title="Add to playlist"`}>${file.name}</span>
                 ${file.type === 'directory' ? 
                     `<button class="outline" onclick="addDirectoryToPlaylist('${currentPath ? currentPath + '/' + file.name : file.name}')" title="Add All">➕➕</button>` : 
                     `<button class="outline secondary" onclick="addToPlaylist('${file.name}', '${file.extension}')" title="Add">➕</button>`
