@@ -43,6 +43,27 @@ let currentTrackIndex = -1;
  */
 let isPlaying = false;
 
+/**
+ * Load playlist and current path from localStorage on page load
+ */
+function loadFromStorage() {
+    const savedPlaylist = localStorage.getItem('audioPlayerPlaylist');
+    const savedTrackIndex = localStorage.getItem('audioPlayerCurrentTrackIndex');
+    const savedPath = localStorage.getItem('audioPlayerCurrentPath');
+    
+    if (savedPlaylist) {
+        playlist = JSON.parse(savedPlaylist);
+    }
+    
+    if (savedTrackIndex !== null) {
+        currentTrackIndex = parseInt(savedTrackIndex);
+    }
+    
+    if (savedPath !== null) {
+        currentPath = savedPath;
+    }
+}
+
 // === DOM ELEMENTS ===
 /** @type {HTMLElement} Breadcrumb navigation element */
 let breadcrumbEl;
@@ -123,8 +144,20 @@ document.addEventListener('DOMContentLoaded', () => {
     clearBtn = document.getElementById('clearBtn');
     notificationEl = document.getElementById('notification');
 
-    loadDirectory('');
+    // Load data from localStorage
+    loadFromStorage();
+    
+    // Render playlist if it was loaded from storage
+    if (playlist.length > 0) {
+        renderPlaylist();
+    }
+
+    // Load directory based on saved path or default to root
+    loadDirectory(currentPath);
     setupEventListeners();
+    
+    // Initialize now playing display
+    updateNowPlaying();
 });
 
 // === EVENT LISTENERS ===
@@ -143,6 +176,17 @@ function setupEventListeners() {
     importBtn.addEventListener('click', importPlaylist);
     exportBtn.addEventListener('click', exportPlaylist);
     clearBtn.addEventListener('click', clearPlaylist);
+    
+    // Add event listener for the new "Add All" button
+    const addAllBtn = document.getElementById('addAllBtn');
+    if (addAllBtn) {
+        addAllBtn.addEventListener('click', () => {
+            addDirectoryToPlaylist('.');
+        });
+    }
+    
+    // Set initial volume
+    setVolume();
 }
 
 // === DIRECTORY BROWSING FUNCTIONS ===
@@ -183,6 +227,9 @@ function updateBreadcrumb() {
     });
 
     breadcrumbEl.innerHTML = breadcrumbHTML;
+    
+    // Save current path to localStorage
+    saveToStorage();
 }
 
 /**
@@ -209,11 +256,10 @@ function renderFileList(files) {
         // Generate HTML for file item
         li.innerHTML = `
             <span class="file-icon ${iconClass}">${icon}</span>
-            <span class="file-name">${file.name}</span>
+            <span class="file-name" ${file.type === 'directory' ? `style="cursor: pointer; text-decoration: underline;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
             <div class="file-actions">
                 ${file.type === 'directory' ? 
-                    `<button class="btn btn-primary" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')">Open</button>
-                     <button class="btn btn-success" onclick="addDirectoryToPlaylist('${file.name}')">Add All</button>` : 
+                    `<button class="btn btn-success" onclick="addDirectoryToPlaylist('${file.name}')">Add All</button>` : 
                     `<button class="btn btn-success" onclick="addToPlaylist('${file.name}', '${file.extension}')">Add</button>`
                 }
             </div>
@@ -266,7 +312,13 @@ function addToPlaylist(filename, extension) {
  * @param {string} dirname - Name of the directory to add
  */
 function addDirectoryToPlaylist(dirname) {
-    const fullPath = currentPath ? currentPath + '/' + dirname : dirname;
+    // Handle special case for current directory
+    let fullPath;
+    if (dirname === '.') {
+        fullPath = currentPath; // Current directory
+    } else {
+        fullPath = currentPath ? currentPath + '/' + dirname : dirname;
+    }
     
     // Load all audio files from directory recursively
     fetch(`api.php?action=getDirectoryFiles&path=${encodeURIComponent(fullPath)}`)
@@ -294,6 +346,15 @@ function addDirectoryToPlaylist(dirname) {
 }
 
 /**
+ * Save playlist and current path to localStorage
+ */
+function saveToStorage() {
+    localStorage.setItem('audioPlayerPlaylist', JSON.stringify(playlist));
+    localStorage.setItem('audioPlayerCurrentTrackIndex', currentTrackIndex.toString());
+    localStorage.setItem('audioPlayerCurrentPath', currentPath);
+}
+
+/**
  * Render the playlist in the UI
  */
 function renderPlaylist() {
@@ -310,7 +371,7 @@ function renderPlaylist() {
         // Generate HTML for playlist item
         li.innerHTML = `
             <span class="item-number">${index + 1}.</span>
-            <span class="playlist-title">${item.title}</span>
+            <span class="playlist-title" style="cursor: pointer; text-decoration: underline;" onclick="playTrack(${index})">${item.title}</span>
             <div class="playlist-controls">
                 <button class="btn btn-danger" onclick="removeFromPlaylist(${index})">Remove</button>
             </div>
@@ -326,6 +387,9 @@ function renderPlaylist() {
     });
 
     updatePlayerControls();
+    
+    // Save to localStorage
+    saveToStorage();
 }
 
 /**
@@ -543,7 +607,10 @@ function playAudio() {
         .then(() => {
             isPlaying = true;
             updatePlayPauseButtons();
+            updateNowPlaying(); // Update now playing display
             showNotification('Now playing: ' + track.title);
+            // Save current state to localStorage
+            saveToStorage();
         })
         .catch(error => {
             showNotification('Error playing audio: ' + error.message, 'error');
@@ -567,6 +634,17 @@ function playPrevious() {
 
     // Cycle to last track if at beginning
     currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+    playAudio();
+}
+
+/**
+ * Play a specific track by index
+ * @param {number} index - Index of the track to play
+ */
+function playTrack(index) {
+    if (playlist.length === 0 || index < 0 || index >= playlist.length) return;
+    
+    currentTrackIndex = index;
     playAudio();
 }
 
@@ -619,6 +697,18 @@ function setProgress(e) {
  */
 function setVolume() {
     audioPlayer.volume = volumeSlider.value;
+}
+
+/**
+ * Update the now playing display
+ */
+function updateNowPlaying() {
+    const nowPlayingTitleEl = document.getElementById('nowPlayingTitle');
+    if (currentTrackIndex >= 0 && currentTrackIndex < playlist.length) {
+        nowPlayingTitleEl.textContent = playlist[currentTrackIndex].title;
+    } else {
+        nowPlayingTitleEl.textContent = 'Nothing';
+    }
 }
 
 /**

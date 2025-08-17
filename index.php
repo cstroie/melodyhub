@@ -35,8 +35,11 @@
                 <h2>Directory Browser</h2>
                 <nav aria-label="Breadcrumb" id="breadcrumb">
                     <!-- Breadcrumb will be populated by JavaScript -->
-                </nav>
-                <ul id="fileList">
+                </div>
+                <div class="directory-controls">
+                    <button class="btn btn-success" id="addAllBtn">Add All Files in Current Directory</button>
+                </div>
+                <ul class="file-list" id="fileList">
                     <!-- File list will be populated by JavaScript -->
                 </ul>
             </section>
@@ -51,6 +54,9 @@
                 </div>
                 
                 <div class="player-controls">
+                    <div class="now-playing" id="nowPlaying">
+                        Now Playing: <span id="nowPlayingTitle">Nothing</span>
+                    </div>
                     <div class="time-info">
                         <span id="currentTime">0:00</span>
                         <span id="totalTime">0:00</span>
@@ -67,7 +73,7 @@
                     </div>
                     <div class="volume-container">
                         <span>🔈</span>
-                        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
                         <span>🔊</span>
                     </div>
                 </div>
