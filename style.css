@@ -58,6 +58,11 @@ header {
   height: 100%;
 }
 
+.volumeSlider {
+  width: 100%;
+  height: 100%;
+}
+
 .notification {
   position: fixed;
   top: 1.25rem;
