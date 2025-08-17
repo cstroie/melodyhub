@@ -255,7 +255,7 @@ function renderFileList(files) {
         // Generate HTML for file item
         li.innerHTML = `
             <span class="fileIcon ${iconClass}">${icon}</span>
-            <span class="fileName" ${file.type === 'directory' ? `style="cursor: pointer; text-decoration: underline;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
+            <span class="fileName" ${file.type === 'directory' ? `style="cursor: pointer;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
                 ${file.type === 'directory' ? 
                     `<button class="outline" onclick="addDirectoryToPlaylist('${currentPath ? currentPath + '/' + file.name : file.name}')" title="Add All">➕➕</button>` : 
                     `<button class="outline secondary" onclick="addToPlaylist('${file.name}', '${file.extension}')" title="Add">➕</button>`
@@ -376,7 +376,7 @@ function renderPlaylist() {
             // Generate HTML for playlist item
             li.innerHTML = `
                 <span class="itemNumber">${index + 1}.</span>
-                <span class="playlistTitle" style="cursor: pointer; text-decoration: underline;" onclick="playTrack(${index})">${item.title}</span>
+                <span class="playlistTitle" style="cursor: pointer;" onclick="playTrack(${index})">${item.title}</span>
                 <button class="secondary" onclick="removeFromPlaylist(${index})" title="Remove">🗑️</button>
             `;
 
