@@ -35,6 +35,9 @@
                 <div class="breadcrumb" id="breadcrumb">
                     <!-- Breadcrumb will be populated by JavaScript -->
                 </div>
+                <div class="directory-controls">
+                    <button class="btn btn-success" id="addAllBtn">Add All Files in Current Directory</button>
+                </div>
                 <ul class="file-list" id="fileList">
                     <!-- File list will be populated by JavaScript -->
                 </ul>

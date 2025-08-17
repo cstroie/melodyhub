@@ -177,6 +177,14 @@ function setupEventListeners() {
     exportBtn.addEventListener('click', exportPlaylist);
     clearBtn.addEventListener('click', clearPlaylist);
     
+    // Add event listener for the new "Add All" button
+    const addAllBtn = document.getElementById('addAllBtn');
+    if (addAllBtn) {
+        addAllBtn.addEventListener('click', () => {
+            addDirectoryToPlaylist('.');
+        });
+    }
+    
     // Set initial volume
     setVolume();
 }
@@ -304,7 +312,13 @@ function addToPlaylist(filename, extension) {
  * @param {string} dirname - Name of the directory to add
  */
 function addDirectoryToPlaylist(dirname) {
-    const fullPath = currentPath ? currentPath + '/' + dirname : dirname;
+    // Handle special case for current directory
+    let fullPath;
+    if (dirname === '.') {
+        fullPath = currentPath; // Current directory
+    } else {
+        fullPath = currentPath ? currentPath + '/' + dirname : dirname;
+    }
     
     // Load all audio files from directory recursively
     fetch(`api.php?action=getDirectoryFiles&path=${encodeURIComponent(fullPath)}`)
