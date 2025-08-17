@@ -183,6 +183,9 @@ function updateBreadcrumb() {
     });
 
     breadcrumbEl.innerHTML = breadcrumbHTML;
+    
+    // Save current path to localStorage
+    saveToStorage();
 }
 
 /**
