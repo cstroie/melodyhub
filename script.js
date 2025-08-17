@@ -251,8 +251,7 @@ function renderFileList(files) {
             <span class="file-name" ${file.type === 'directory' ? `style="cursor: pointer; text-decoration: underline;" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')"` : ''}>${file.name}</span>
             <div class="file-actions">
                 ${file.type === 'directory' ? 
-                    `<button class="btn btn-primary" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')">Open</button>
-                     <button class="btn btn-success" onclick="addDirectoryToPlaylist('${file.name}')">Add All</button>` : 
+                    `<button class="btn btn-success" onclick="addDirectoryToPlaylist('${file.name}')">Add All</button>` : 
                     `<button class="btn btn-success" onclick="addToPlaylist('${file.name}', '${file.extension}')">Add</button>`
                 }
             </div>
