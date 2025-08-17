@@ -689,7 +689,9 @@ function setProgress(e) {
  * Set audio volume based on slider value
  */
 function setVolume() {
-    audioPlayer.volume = volumeSlider.value;
+    state.volume = volumeSlider.value;
+    audioPlayer.volume = state.volume;
+    saveToStorage();
 }
 
 /**
