@@ -48,6 +48,9 @@ switch ($action) {
     case 'loadPlaylist':
         loadPlaylist();
         break;
+    case 'getDirectoryFiles':
+        getDirectoryFiles();
+        break;
     default:
         echo json_encode(['error' => 'Invalid action']);
         break;
@@ -188,6 +191,70 @@ function playAudio() {
     // Stream the file content to the client
     readfile($fullPath);
     exit;
+}
+
+/**
+ * Get all audio files from a directory recursively
+ * 
+ * This function returns a JSON array of all audio files in the specified directory
+ * and its subdirectories.
+ * 
+ * @return void Outputs JSON response with file listing
+ */
+function getDirectoryFiles() {
+    global $basePath;
+    
+    // Get the requested path, default to empty string
+    $path = $_GET['path'] ?? '';
+    
+    // Security check to prevent directory traversal
+    $fullPath = realpath($basePath . '/' . $path);
+    if (!$fullPath || strpos($fullPath, realpath($basePath)) !== 0) {
+        echo json_encode(['error' => 'Invalid path']);
+        return;
+    }
+    
+    // Check if the path is actually a directory
+    if (!is_dir($fullPath)) {
+        echo json_encode(['error' => 'Directory not found']);
+        return;
+    }
+    
+    // Initialize files array
+    $files = [];
+    
+    // Define supported audio extensions
+    $audioExtensions = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'];
+    
+    // Create recursive iterator to get all files
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($fullPath, RecursiveDirectoryIterator::SKIP_DOTS)
+    );
+    
+    // Process each file
+    foreach ($iterator as $file) {
+        if ($file->isFile()) {
+            $extension = strtolower($file->getExtension());
+            
+            // Only include audio files
+            if (in_array($extension, $audioExtensions)) {
+                // Get relative path from base path
+                $relativePath = substr($file->getPathname(), strlen(realpath($basePath)) + 1);
+                $files[] = [
+                    'name' => $file->getFilename(),
+                    'path' => $relativePath
+                ];
+            }
+        }
+    }
+    
+    // Sort files alphabetically by path
+    usort($files, function($a, $b) {
+        return strcmp($a['path'], $b['path']);
+    });
+    
+    // Return JSON response with file list
+    echo json_encode(['files' => $files]);
 }
 
 /**

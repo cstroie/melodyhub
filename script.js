@@ -212,7 +212,8 @@ function renderFileList(files) {
             <span class="file-name">${file.name}</span>
             <div class="file-actions">
                 ${file.type === 'directory' ? 
-                    `<button class="btn btn-primary" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')">Open</button>` : 
+                    `<button class="btn btn-primary" onclick="loadDirectory('${currentPath ? currentPath + '/' + file.name : file.name}')">Open</button>
+                     <button class="btn btn-success" onclick="addDirectoryToPlaylist('${file.name}')">Add All</button>` : 
                     `<button class="btn btn-success" onclick="addToPlaylist('${file.name}', '${file.extension}')">Add</button>`
                 }
             </div>
@@ -258,6 +259,38 @@ function addToPlaylist(filename, extension) {
         renderPlaylist();
         showNotification('Added to playlist: ' + filename);
     }
+}
+
+/**
+ * Add all audio files from a directory to the playlist
+ * @param {string} dirname - Name of the directory to add
+ */
+function addDirectoryToPlaylist(dirname) {
+    const fullPath = currentPath ? currentPath + '/' + dirname : dirname;
+    
+    // Load all audio files from directory recursively
+    fetch(`api.php?action=getDirectoryFiles&path=${encodeURIComponent(fullPath)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showNotification('Error: ' + data.error, 'error');
+                return;
+            }
+            
+            // Add each file to our playlist
+            data.files.forEach(file => {
+                playlist.push({
+                    title: file.name,
+                    path: file.path
+                });
+            });
+            
+            renderPlaylist();
+            showNotification(`Added ${data.files.length} tracks from directory`);
+        })
+        .catch(error => {
+            showNotification('Error loading directory: ' + error.message, 'error');
+        });
 }
 
 /**
