@@ -43,6 +43,27 @@ let currentTrackIndex = -1;
  */
 let isPlaying = false;
 
+/**
+ * Load playlist and current path from localStorage on page load
+ */
+function loadFromStorage() {
+    const savedPlaylist = localStorage.getItem('audioPlayerPlaylist');
+    const savedTrackIndex = localStorage.getItem('audioPlayerCurrentTrackIndex');
+    const savedPath = localStorage.getItem('audioPlayerCurrentPath');
+    
+    if (savedPlaylist) {
+        playlist = JSON.parse(savedPlaylist);
+    }
+    
+    if (savedTrackIndex !== null) {
+        currentTrackIndex = parseInt(savedTrackIndex);
+    }
+    
+    if (savedPath !== null) {
+        currentPath = savedPath;
+    }
+}
+
 // === DOM ELEMENTS ===
 /** @type {HTMLElement} Breadcrumb navigation element */
 let breadcrumbEl;
@@ -123,7 +144,16 @@ document.addEventListener('DOMContentLoaded', () => {
     clearBtn = document.getElementById('clearBtn');
     notificationEl = document.getElementById('notification');
 
-    loadDirectory('');
+    // Load data from localStorage
+    loadFromStorage();
+    
+    // Render playlist if it was loaded from storage
+    if (playlist.length > 0) {
+        renderPlaylist();
+    }
+
+    // Load directory based on saved path or default to root
+    loadDirectory(currentPath);
     setupEventListeners();
 });
 
@@ -297,6 +327,15 @@ function addDirectoryToPlaylist(dirname) {
 }
 
 /**
+ * Save playlist and current path to localStorage
+ */
+function saveToStorage() {
+    localStorage.setItem('audioPlayerPlaylist', JSON.stringify(playlist));
+    localStorage.setItem('audioPlayerCurrentTrackIndex', currentTrackIndex.toString());
+    localStorage.setItem('audioPlayerCurrentPath', currentPath);
+}
+
+/**
  * Render the playlist in the UI
  */
 function renderPlaylist() {
@@ -329,6 +368,9 @@ function renderPlaylist() {
     });
 
     updatePlayerControls();
+    
+    // Save to localStorage
+    saveToStorage();
 }
 
 /**
@@ -547,6 +589,8 @@ function playAudio() {
             isPlaying = true;
             updatePlayPauseButtons();
             showNotification('Now playing: ' + track.title);
+            // Save current state to localStorage
+            saveToStorage();
         })
         .catch(error => {
             showNotification('Error playing audio: ' + error.message, 'error');
