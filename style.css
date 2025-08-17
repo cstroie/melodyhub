@@ -42,7 +42,7 @@ header h1 {
   padding: 0.75rem;
   border-bottom: 1px solid var(--border-color);
   display: grid;
-  grid-template-columns: 3rem 1fr 6rem;
+  grid-template-columns: 3rem 1fr 4rem;
   align-items: center;
   font-family: var(--font-primary);
 }
