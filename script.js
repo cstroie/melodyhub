@@ -373,10 +373,14 @@ function renderPlaylist() {
             li.draggable = true;
             li.dataset.index = index;
 
+            // Check if this is the currently playing track
+            const isCurrentTrack = index === currentTrackIndex;
+            const titleStyle = isCurrentTrack ? 'cursor: pointer; color: #ffeb3b; font-weight: bold;' : 'cursor: pointer;';
+
             // Generate HTML for playlist item
             li.innerHTML = `
                 <span class="itemNumber">${index + 1}.</span>
-                <span class="playlistTitle" style="cursor: pointer;" onclick="playTrack(${index})">${item.title}</span>
+                <span class="playlistTitle" style="${titleStyle}" onclick="playTrack(${index})">${item.title}</span>
                 <button class="secondary" onclick="removeFromPlaylist(${index})" title="Remove">🗑️</button>
             `;
 
