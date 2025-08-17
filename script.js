@@ -591,6 +591,7 @@ function playAudio() {
         .then(() => {
             isPlaying = true;
             updatePlayPauseButtons();
+            updateNowPlaying(); // Update now playing display
             showNotification('Now playing: ' + track.title);
             // Save current state to localStorage
             saveToStorage();
@@ -702,9 +703,6 @@ function updatePlayPauseButtons() {
     pauseBtn.disabled = !isPlaying;
     prevBtn.disabled = playlist.length === 0;
     nextBtn.disabled = playlist.length === 0;
-    
-    // Update now playing display
-    updateNowPlaying();
 }
 
 /**
@@ -713,9 +711,6 @@ function updatePlayPauseButtons() {
 function updatePlayerControls() {
     prevBtn.disabled = playlist.length === 0;
     nextBtn.disabled = playlist.length === 0;
-    
-    // Update now playing display
-    updateNowPlaying();
 }
 
 /**
