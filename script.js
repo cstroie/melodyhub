@@ -329,7 +329,7 @@ function addDirectoryToPlaylist(dirname) {
     // Handle special case for current directory
     let fullPath;
     if (dirname === '.') {
-        fullPath = currentPath; // Current directory
+        fullPath = currentPath || '.'; // Current directory
     } else {
         fullPath = currentPath ? currentPath + '/' + dirname : dirname;
     }
