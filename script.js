@@ -5,6 +5,39 @@
  * It handles UI interactions, playlist management, and audio playback.
  */
 
+// === LOGGING FUNCTIONS ===
+/**
+ * Log debug messages to console
+ * @param {...any} args - Arguments to log
+ */
+function logDebug(...args) {
+    console.debug('[MelodyHub Debug]', ...args);
+}
+
+/**
+ * Log info messages to console
+ * @param {...any} args - Arguments to log
+ */
+function logInfo(...args) {
+    console.info('[MelodyHub Info]', ...args);
+}
+
+/**
+ * Log warning messages to console
+ * @param {...any} args - Arguments to log
+ */
+function logWarning(...args) {
+    console.warn('[MelodyHub Warning]', ...args);
+}
+
+/**
+ * Log error messages to console
+ * @param {...any} args - Arguments to log
+ */
+function logError(...args) {
+    console.error('[MelodyHub Error]', ...args);
+}
+
 // === CONFIGURATION ===
 /**
  * Supported audio file extensions
@@ -46,28 +79,37 @@ let isPlaying = state.isPlaying;
  * This function restores the user's previous session
  */
 function loadFromStorage() {
+    logDebug('Loading data from localStorage');
     const savedPlaylist = localStorage.getItem('audioPlayerPlaylist');
     const savedTrackIndex = localStorage.getItem('audioPlayerCurrentTrackIndex');
     const savedPath = localStorage.getItem('audioPlayerCurrentPath');
     const savedVolume = localStorage.getItem('audioPlayerVolume');
     
     if (savedPlaylist) {
-        state.playlist = JSON.parse(savedPlaylist);
-        playlist = state.playlist;
+        try {
+            state.playlist = JSON.parse(savedPlaylist);
+            playlist = state.playlist;
+            logInfo(`Loaded playlist with ${state.playlist.length} items from storage`);
+        } catch (e) {
+            logError('Failed to parse saved playlist:', e);
+        }
     }
     
     if (savedTrackIndex !== null) {
         state.currentTrackIndex = parseInt(savedTrackIndex);
         currentTrackIndex = state.currentTrackIndex;
+        logDebug(`Current track index set to ${state.currentTrackIndex}`);
     }
     
     if (savedPath !== null) {
         state.currentPath = savedPath;
         currentPath = state.currentPath;
+        logDebug(`Current path set to ${state.currentPath}`);
     }
     
     if (savedVolume !== null) {
         state.volume = parseFloat(savedVolume);
+        logDebug(`Volume set to ${state.volume}`);
     }
 }
 
@@ -129,6 +171,8 @@ let notificationEl;
  * This is the main entry point of the application
  */
 document.addEventListener('DOMContentLoaded', () => {
+    logInfo('Initializing MelodyHub Audio Player');
+    
     // Get DOM elements
     breadcrumbEl = document.getElementById('breadcrumb');
     fileListEl = document.getElementById('fileList');
@@ -157,15 +201,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Render playlist if it was loaded from storage
     if (playlist.length > 0) {
+        logDebug(`Rendering playlist with ${playlist.length} items`);
         renderPlaylist();
     }
 
     // Load directory based on saved path or default to root
+    logDebug(`Loading directory: ${currentPath || 'root'}`);
     loadDirectory(currentPath);
     setupEventListeners();
     
     // Initialize now playing display
     updateNowPlaying();
+    
+    logInfo('MelodyHub Audio Player initialized successfully');
 });
 
 // === EVENT LISTENERS ===
@@ -204,16 +252,29 @@ function setupEventListeners() {
  * @param {string} path - Directory path to load
  */
 function loadDirectory(path) {
+    logDebug(`Loading directory: ${path}`);
     currentPath = path;
     updateBreadcrumb();
 
     // Fetch directory contents from API
     fetch(`api.php?action=list&path=${encodeURIComponent(path)}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.error) {
+                logError('API error loading directory:', data.error);
+                showNotification('Error loading directory: ' + data.error, 'error');
+                return;
+            }
+            logDebug(`Loaded ${data.files.length} items from directory`);
             renderFileList(data.files);
         })
         .catch(error => {
+            logError('Network error loading directory:', error);
             showNotification('Error loading directory: ' + error.message, 'error');
         });
 }
@@ -223,6 +284,7 @@ function loadDirectory(path) {
  * This creates a navigable path showing where the user is in the directory structure
  */
 function updateBreadcrumb() {
+    logDebug(`Updating breadcrumb for path: ${currentPath}`);
     // Split path into components and filter out empty parts
     const paths = currentPath.split('/').filter(p => p);
     // Start with home link
@@ -288,12 +350,24 @@ function renderFileList(files) {
  * @param {string} extension - File extension
  */
 function addToPlaylist(filename, extension) {
+    logDebug(`Adding file to playlist: ${filename} (${extension})`);
     // Check if file is a playlist
     if (PLAYLIST_EXTENSIONS.includes(extension)) {
+        logInfo(`Loading playlist file: ${filename}`);
         // Load playlist content from API
         fetch(`api.php?action=loadPlaylist&path=${encodeURIComponent(currentPath + '/' + filename)}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                if (data.error) {
+                    logError('API error loading playlist:', data.error);
+                    showNotification('Error loading playlist: ' + data.error, 'error');
+                    return;
+                }
                 // Add each file in the playlist to our playlist
                 data.files.forEach(file => {
                     state.playlist.push({
@@ -302,10 +376,12 @@ function addToPlaylist(filename, extension) {
                     });
                 });
                 playlist = state.playlist;
+                logInfo(`Added ${data.files.length} tracks from playlist`);
                 renderPlaylist();
                 showNotification(`Added ${data.files.length} tracks from playlist`);
             })
             .catch(error => {
+                logError('Network error loading playlist:', error);
                 showNotification('Error loading playlist: ' + error.message, 'error');
             });
     } else {
@@ -316,6 +392,7 @@ function addToPlaylist(filename, extension) {
             path: fullPath
         });
         playlist = state.playlist;
+        logDebug(`Added audio file to playlist: ${filename}`);
         renderPlaylist();
         showNotification('Added to playlist: ' + filename);
     }
