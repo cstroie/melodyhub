@@ -27,6 +27,8 @@ header h1 {
 .fileList, .playList {
   padding: 0;
   font-family: var(--font-primary);
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .fileList li {
