@@ -242,7 +242,8 @@ function getDirectoryFiles() {
                 $relativePath = substr($file->getPathname(), strlen(realpath($basePath)) + 1);
                 $files[] = [
                     'name' => $file->getFilename(),
-                    'path' => $relativePath
+                    'path' => $relativePath,
+                    'extension' => $extension
                 ];
             }
         }
