@@ -411,7 +411,8 @@ function addDirectoryToPlaylist(dirname) {
     if (dirname === '.') {
         fullPath = currentPath || '.'; // Current directory
     } else {
-        fullPath = currentPath ? currentPath + '/' + dirname : dirname;
+        // dirname is already the full path from the API, no need to concatenate
+        fullPath = dirname;
     }
     
     // Load all audio files from directory recursively
