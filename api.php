@@ -106,10 +106,18 @@ function listDirectory() {
         
         // Check if item is a directory
         if (is_dir($itemPath)) {
+            // For directories, check if they contain audio files and look for cover art
+            $coverArt = findCoverArtInDirectory($itemPath);
+            if ($coverArt) {
+                // Convert to relative path
+                $coverArt = substr($coverArt, strlen(realpath($basePath)) + 1);
+            }
+                
             $files[] = [
                 'name' => $item,
                 'type' => 'directory',
-                'path' => $relativePath
+                'path' => $relativePath,
+                'coverArt' => $coverArt
             ];
         } else {
             // For files, extract extension for type identification
