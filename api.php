@@ -83,7 +83,17 @@ function listDirectory() {
     // realpath() resolves symbolic links and returns absolute path
     // strpos() ensures the resolved path is within the base path
     $fullPath = realpath($basePath . '/' . $path);
-    if (!$fullPath || strpos($fullPath, realpath($basePath)) !== 0) {
+    $realBasePath = realpath($basePath);
+    
+    // Additional security checks
+    if (!$fullPath || !$realBasePath || strpos($fullPath, $realBasePath) !== 0) {
+        echo json_encode(['error' => 'Invalid path']);
+        return;
+    }
+    
+    // Ensure we're still within the base path after normalization
+    $normalizedPath = str_replace('\\', '/', substr($fullPath, strlen($realBasePath)));
+    if (preg_match('/\.\.(\/|\\\\|$)/', $normalizedPath)) {
         echo json_encode(['error' => 'Invalid path']);
         return;
     }
@@ -200,7 +210,18 @@ function playAudio() {
     
     // Security check to prevent directory traversal
     $fullPath = realpath($basePath . '/' . $file);
-    if (!$fullPath || strpos($fullPath, realpath($basePath)) !== 0) {
+    $realBasePath = realpath($basePath);
+    
+    // Additional security checks
+    if (!$fullPath || !$realBasePath || strpos($fullPath, $realBasePath) !== 0) {
+        http_response_code(404);
+        echo 'File not found';
+        return;
+    }
+    
+    // Ensure we're still within the base path after normalization
+    $normalizedPath = str_replace('\\', '/', substr($fullPath, strlen($realBasePath)));
+    if (preg_match('/\.\.(\/|\\\\|$)/', $normalizedPath)) {
         http_response_code(404);
         echo 'File not found';
         return;
@@ -253,7 +274,18 @@ function serveCoverArt() {
     
     // Security check to prevent directory traversal
     $fullPath = realpath($basePath . '/' . $file);
-    if (!$fullPath || strpos($fullPath, realpath($basePath)) !== 0) {
+    $realBasePath = realpath($basePath);
+    
+    // Additional security checks
+    if (!$fullPath || !$realBasePath || strpos($fullPath, $realBasePath) !== 0) {
+        http_response_code(404);
+        echo 'File not found';
+        return;
+    }
+    
+    // Ensure we're still within the base path after normalization
+    $normalizedPath = str_replace('\\', '/', substr($fullPath, strlen($realBasePath)));
+    if (preg_match('/\.\.(\/|\\\\|$)/', $normalizedPath)) {
         http_response_code(404);
         echo 'File not found';
         return;
@@ -304,7 +336,17 @@ function getDirectoryFiles() {
     
     // Security check to prevent directory traversal
     $fullPath = realpath($basePath . '/' . $path);
-    if (!$fullPath || strpos($fullPath, realpath($basePath)) !== 0) {
+    $realBasePath = realpath($basePath);
+    
+    // Additional security checks
+    if (!$fullPath || !$realBasePath || strpos($fullPath, $realBasePath) !== 0) {
+        echo json_encode(['error' => 'Invalid path']);
+        return;
+    }
+    
+    // Ensure we're still within the base path after normalization
+    $normalizedPath = str_replace('\\', '/', substr($fullPath, strlen($realBasePath)));
+    if (preg_match('/\.\.(\/|\\\\|$)/', $normalizedPath)) {
         echo json_encode(['error' => 'Invalid path']);
         return;
     }
@@ -379,7 +421,17 @@ function loadPlaylist() {
     
     // Security check to prevent directory traversal
     $fullPath = realpath($basePath . '/' . $file);
-    if (!$fullPath || strpos($fullPath, realpath($basePath)) !== 0) {
+    $realBasePath = realpath($basePath);
+    
+    // Additional security checks
+    if (!$fullPath || !$realBasePath || strpos($fullPath, $realBasePath) !== 0) {
+        echo json_encode(['error' => 'Invalid path']);
+        return;
+    }
+    
+    // Ensure we're still within the base path after normalization
+    $normalizedPath = str_replace('\\', '/', substr($fullPath, strlen($realBasePath)));
+    if (preg_match('/\.\.(\/|\\\\|$)/', $normalizedPath)) {
         echo json_encode(['error' => 'Invalid path']);
         return;
     }
@@ -438,11 +490,19 @@ function loadPlaylist() {
         foreach ($lines as $line) {
             // Match PLS file entries (File1=path, File2=path, etc.)
             if (preg_match('/^File\d+=(.+)$/', $line, $matches)) {
+                // Sanitize the file path to prevent directory traversal
+                $playlistEntry = $matches[1];
+                
+                // Prevent directory traversal in playlist entries
+                if (strpos($playlistEntry, '..') !== false) {
+                    continue; // Skip this entry
+                }
+                
                 // Resolve relative paths based on playlist location
-                $filePath = dirname($file) . '/' . $matches[1];
+                $filePath = dirname($file) . '/' . $playlistEntry;
                 $files[] = [
                     'path' => $filePath,
-                    'title' => basename($matches[1]),
+                    'title' => basename($playlistEntry),
                     'coverArt' => $coverArt
                 ];
             }

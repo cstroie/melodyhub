@@ -382,12 +382,18 @@ function renderFileList(files) {
 
         // Generate HTML for file item
         // Escape single quotes in file names for JavaScript onclick handlers
-        const escapedFileName = file.name.replace(/'/g, "\\'");
+        const escapedFileName = file.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const fullPath = currentPath ? currentPath + '/' + file.name : file.name;
-        const escapedFullPath = fullPath.replace(/'/g, "\\'");
+        const escapedFullPath = fullPath.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
         // Properly escape the path for use in onclick handlers
         const jsSafePath = fullPath.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        
+        // Security check: ensure filename doesn't contain directory traversal sequences
+        if (file.name.includes('..') || file.name.includes('\\')) {
+            console.warn('Skipping file with potentially unsafe name:', file.name);
+            return;
+        }
         
         li.innerHTML = `
             ${iconHTML}
@@ -692,6 +698,12 @@ function importPlaylist() {
             return;
         }
 
+        // Additional security check on file name
+        if (file.name.includes('..') || file.name.includes('\\')) {
+            showNotification('Invalid file name', 'error');
+            return;
+        }
+
         // Read the file content
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -704,9 +716,16 @@ function importPlaylist() {
                 let trackCount = 0;
                 lines.forEach(line => {
                     if (line.trim()) {
+                        // Security check: prevent directory traversal in imported playlist entries
+                        const cleanLine = line.trim();
+                        if (cleanLine.includes('..') || cleanLine.includes('\\')) {
+                            console.warn('Skipping potentially unsafe playlist entry:', cleanLine);
+                            return;
+                        }
+                        
                         state.playlist.push({
-                            title: line.split('/').pop(),
-                            path: line.trim()
+                            title: cleanLine.split('/').pop(),
+                            path: cleanLine
                         });
                         trackCount++;
                     }
