@@ -511,9 +511,6 @@ function renderPlaylist() {
             if (item.coverArt) {
                 // Use cover art as icon
                 iconHTML = `<img src="api.php?action=play&file=${encodeURIComponent(item.coverArt)}" alt="Cover" class="playlist-cover-icon">`;
-            } else {
-                // Use default music icon
-                iconHTML = '<span class="playlist-icon">🎵</span>';
             }
 
             // Generate HTML for playlist item
