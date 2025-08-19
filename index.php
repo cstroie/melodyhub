@@ -30,20 +30,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
     <body class="container-fluid">
-        <!-- Header section with application title -->
-        <header>
-            <h1>MelodyHub</h1>
-            <p>Browse, manage, and play your audio files</p>
-        </header>
                 
         <main>
             <!-- Audio player controls section -->
             <section>
                 <!-- Now playing display -->
-                <h2 id="nowPlaying">
+                <div id="nowPlaying">
                     <span id="nowPlayingCover"><div class="now-playing-cover-placeholder">🎵</div></span>
                     <span id="nowPlayingTitle">--</span>
-                </h2>
+                </div>
                 
                 <!-- Time display showing current position and total duration -->
                 <div class="timeDisplay">
@@ -77,6 +72,11 @@
 
             <!-- Main content area with directory browser and playlist -->
             <section class="grid">
+            
+            <!-- Footer with application name and description -->
+            <footer>
+                <p><strong>MelodyHub</strong> - Browse, manage, and play your audio files</p>
+            </footer>
                 <!-- Directory browser section -->
                 <article>
 <header>
