@@ -312,17 +312,26 @@ function renderFileList(files) {
 
     files.forEach(file => {
         const li = document.createElement('li');
-	li.role = "grid";
+        li.role = "grid";
 
-        // Determine icon class based on file type
-        const iconClass = file.type === 'directory' ? 'folderIcon' : 
-                         AUDIO_EXTENSIONS.includes(file.extension) ? 'audioIcon' : 
-                         PLAYLIST_EXTENSIONS.includes(file.extension) ? 'playlistIcon' : '';
+        // Determine icon based on file type and cover art
+        let iconHTML = '';
+        if (file.coverArt) {
+            // Use cover art as icon
+            iconHTML = `<img src="api.php?action=play&file=${encodeURIComponent(file.coverArt)}" alt="Cover" class="file-cover-icon">`;
+        } else {
+            // Determine icon class based on file type
+            const iconClass = file.type === 'directory' ? 'folderIcon' : 
+                             AUDIO_EXTENSIONS.includes(file.extension) ? 'audioIcon' : 
+                             PLAYLIST_EXTENSIONS.includes(file.extension) ? 'playlistIcon' : '';
 
-        // Determine icon character based on file type
-        const icon = file.type === 'directory' ? '📁' : 
-                    AUDIO_EXTENSIONS.includes(file.extension) ? '🎵' : 
-                    PLAYLIST_EXTENSIONS.includes(file.extension) ? '📝' : '📄';
+            // Determine icon character based on file type
+            const icon = file.type === 'directory' ? '📁' : 
+                        AUDIO_EXTENSIONS.includes(file.extension) ? '🎵' : 
+                        PLAYLIST_EXTENSIONS.includes(file.extension) ? '📝' : '📄';
+            
+            iconHTML = `<span class="fileIcon ${iconClass}">${icon}</span>`;
+        }
 
         // Generate HTML for file item
         // Escape single quotes in file names for JavaScript onclick handlers
@@ -334,7 +343,7 @@ function renderFileList(files) {
         const jsSafePath = fullPath.replace(/'/g, "\\'").replace(/"/g, "&quot;");
         
         li.innerHTML = `
-            <span class="fileIcon ${iconClass}">${icon}</span>
+            ${iconHTML}
             <span class="fileName" style="cursor: pointer;" ${file.type === 'directory' ? `onclick="loadDirectory('${escapedFullPath}')"` : `onclick="addToPlaylist('${escapedFileName}', '${file.extension}')" title="Add to playlist"`}>${file.name}</span>
                 ${file.type === 'directory' ? 
                     `<button class="outline" onclick="addDirectoryToPlaylist('${jsSafePath}')" title="Add All">➕➕</button>` : 
@@ -375,7 +384,8 @@ function addToPlaylist(filename, extension) {
                 data.files.forEach(file => {
                     state.playlist.push({
                         title: file.title || file.path.split('/').pop(),
-                        path: file.path
+                        path: file.path,
+                        coverArt: file.coverArt || null
                     });
                 });
                 playlist = state.playlist;
@@ -390,14 +400,34 @@ function addToPlaylist(filename, extension) {
     } else {
         // Add single audio file to playlist
         const fullPath = currentPath ? currentPath + '/' + filename : filename;
-        state.playlist.push({
-            title: filename,
-            path: fullPath
-        });
-        playlist = state.playlist;
-        logDebug(`Added audio file to playlist: ${filename}`);
-        renderPlaylist();
-        showNotification('Added to playlist: ' + filename);
+        
+        // Try to find cover art for this file's directory
+        fetch(`api.php?action=list&path=${encodeURIComponent(currentPath)}`)
+            .then(response => response.json())
+            .then(data => {
+                const coverArt = data.coverArt || null;
+                state.playlist.push({
+                    title: filename,
+                    path: fullPath,
+                    coverArt: coverArt
+                });
+                playlist = state.playlist;
+                logDebug(`Added audio file to playlist: ${filename}`);
+                renderPlaylist();
+                showNotification('Added to playlist: ' + filename);
+            })
+            .catch(error => {
+                // Fallback if we can't get cover art
+                state.playlist.push({
+                    title: filename,
+                    path: fullPath,
+                    coverArt: null
+                });
+                playlist = state.playlist;
+                logDebug(`Added audio file to playlist: ${filename}`);
+                renderPlaylist();
+                showNotification('Added to playlist: ' + filename);
+            });
     }
 }
 
@@ -428,7 +458,8 @@ function addDirectoryToPlaylist(dirname) {
             data.files.forEach(file => {
                 state.playlist.push({
                     title: file.name,
-                    path: file.path
+                    path: file.path,
+                    coverArt: file.coverArt || null
                 });
             });
             playlist = state.playlist;
@@ -475,9 +506,20 @@ function renderPlaylist() {
             const isCurrentTrack = index === currentTrackIndex;
             const titleStyle = isCurrentTrack ? 'cursor: pointer; color: #ffeb3b; font-weight: bold;' : 'cursor: pointer;';
 
+            // Determine icon based on cover art
+            let iconHTML = '';
+            if (item.coverArt) {
+                // Use cover art as icon
+                iconHTML = `<img src="api.php?action=play&file=${encodeURIComponent(item.coverArt)}" alt="Cover" class="playlist-cover-icon">`;
+            } else {
+                // Use default music icon
+                iconHTML = '<span class="playlist-icon">🎵</span>';
+            }
+
             // Generate HTML for playlist item
             li.innerHTML = `
                 <span class="itemNumber">${index + 1}.</span>
+                ${iconHTML}
                 <span class="playlistTitle" style="${titleStyle}" onclick="playTrack(${index})">${item.title}</span>
                 <button class="secondary" onclick="removeFromPlaylist(${index})" title="Remove">🗑️</button>
             `;
@@ -493,6 +535,7 @@ function renderPlaylist() {
     }
 
     updatePlayerControls();
+    updateNowPlaying(); // Update now playing display with cover art
     
     // Save to localStorage
     saveToStorage();
@@ -835,14 +878,25 @@ function setVolume() {
 
 /**
  * Update the now playing display
- * This function updates the UI with the currently playing track title
+ * This function updates the UI with the currently playing track title and cover art
  */
 function updateNowPlaying() {
     const nowPlayingTitleEl = document.getElementById('nowPlayingTitle');
+    const nowPlayingCoverEl = document.getElementById('nowPlayingCover');
+    
     if (currentTrackIndex >= 0 && currentTrackIndex < playlist.length) {
-        nowPlayingTitleEl.textContent = playlist[currentTrackIndex].title;
+        const track = playlist[currentTrackIndex];
+        nowPlayingTitleEl.textContent = track.title;
+        
+        // Display cover art if available
+        if (track.coverArt) {
+            nowPlayingCoverEl.innerHTML = `<img src="api.php?action=play&file=${encodeURIComponent(track.coverArt)}" alt="Cover Art" class="now-playing-cover">`;
+        } else {
+            nowPlayingCoverEl.innerHTML = '<div class="now-playing-cover-placeholder">🎵</div>';
+        }
     } else {
         nowPlayingTitleEl.textContent = 'Paused';
+        nowPlayingCoverEl.innerHTML = '<div class="now-playing-cover-placeholder">🎵</div>';
     }
 }
 
