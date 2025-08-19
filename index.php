@@ -32,7 +32,7 @@
     <!-- Load custom styles -->
     <link rel="stylesheet" href="style.css">
 </head>
-    <body class="container-fluid">
+    <body>
                 
         <main>
             <!-- Audio player controls section -->
