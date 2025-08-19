@@ -292,9 +292,9 @@ function updateBreadcrumb() {
     // Build path for each component
     let current = '';
     paths.forEach((path, index) => {
+        current += (index > 0 ? '/' : '') + path;
         // Escape single quotes in path for JavaScript onclick handler
         const escapedPath = current.replace(/'/g, "\\'");
-        current += (index > 0 ? '/' : '') + path;
         breadcrumbHTML += `<li><a href="#" onclick="loadDirectory('${escapedPath}')">${path}</a></li>`;
     });
     breadcrumbEl.innerHTML = '<ul>' + breadcrumbHTML + '</ul>';
