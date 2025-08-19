@@ -33,11 +33,15 @@
                 
         <main>
             <!-- Audio player controls section -->
-            <section>
+            <section class="player-section">
                 <!-- Now playing display -->
-                <div id="nowPlaying">
-                    <span id="nowPlayingCover"><div class="now-playing-cover-placeholder">🎵</div></span>
-                    <span id="nowPlayingTitle">--</span>
+                <div id="nowPlaying" class="now-playing-container">
+                    <div id="nowPlayingCover" class="cover-art-container">
+                        <div class="now-playing-cover-placeholder">🎵</div>
+                    </div>
+                    <div class="track-info">
+                        <span id="nowPlayingTitle" class="track-title">--</span>
+                    </div>
                 </div>
                 
                 <!-- Time display showing current position and total duration -->
