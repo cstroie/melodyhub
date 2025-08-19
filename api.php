@@ -20,19 +20,17 @@
  * Audio Player API
  * 
  * This script provides backend functionality for the audio player web application.
- * It handles directory listing, audio file streaming, and playlist loading.
+ * It handles directory listing, audio file streaming, cover art serving, and playlist loading.
  * 
  * Endpoints:
  * - ?action=list&path=[path] - List directory contents
  * - ?action=play&file=[file] - Stream an audio file
+ * - ?action=cover&file=[file] - Serve a cover art image
  * - ?action=loadPlaylist&path=[file] - Load a playlist file
  */
 
 // Include configuration file
 require_once 'config.php';
-
-// Set JSON response header
-header('Content-Type: application/json');
 
 // Get the requested action
 $action = $_GET['action'] ?? '';
@@ -40,18 +38,25 @@ $action = $_GET['action'] ?? '';
 // Route to appropriate function based on action
 switch ($action) {
     case 'list':
+        header('Content-Type: application/json');
         listDirectory();
         break;
     case 'play':
         playAudio();
         break;
+    case 'cover':
+        serveCoverArt();
+        break;
     case 'loadPlaylist':
+        header('Content-Type: application/json');
         loadPlaylist();
         break;
     case 'getDirectoryFiles':
+        header('Content-Type: application/json');
         getDirectoryFiles();
         break;
     default:
+        header('Content-Type: application/json');
         echo json_encode(['error' => 'Invalid action']);
         break;
 }
@@ -222,6 +227,57 @@ function playAudio() {
     header('Content-Type: ' . $contentType);
     header('Content-Length: ' . filesize($fullPath));
     header('Accept-Ranges: bytes');
+    
+    // Stream the file content to the client
+    readfile($fullPath);
+    exit;
+}
+
+/**
+ * Serve a cover art image
+ * 
+ * This function serves cover art images with appropriate headers.
+ * It includes security checks to prevent unauthorized file access.
+ * 
+ * @return void Streams image file content or returns 404 error
+ */
+function serveCoverArt() {
+    global $basePath;
+    
+    // Get the requested file path
+    $file = $_GET['file'] ?? '';
+    
+    // Security check to prevent directory traversal
+    $fullPath = realpath($basePath . '/' . $file);
+    if (!$fullPath || strpos($fullPath, realpath($basePath)) !== 0) {
+        http_response_code(404);
+        echo 'File not found';
+        return;
+    }
+    
+    // Check if file exists
+    if (!file_exists($fullPath)) {
+        http_response_code(404);
+        echo 'File not found';
+        return;
+    }
+    
+    // Determine content type based on file extension
+    $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'bmp' => 'image/bmp'
+    ];
+    
+    // Default to JPEG if extension not found
+    $contentType = $mimeTypes[$extension] ?? 'image/jpeg';
+    
+    // Set appropriate headers for image serving
+    header('Content-Type: ' . $contentType);
+    header('Content-Length: ' . filesize($fullPath));
     
     // Stream the file content to the client
     readfile($fullPath);

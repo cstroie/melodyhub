@@ -318,7 +318,7 @@ function renderFileList(files) {
         let iconHTML = '';
         if (file.coverArt) {
             // Use cover art as icon
-            iconHTML = `<img src="api.php?action=play&file=${encodeURIComponent(file.coverArt)}" alt="Cover" class="file-cover-icon">`;
+            iconHTML = `<img src="api.php?action=cover&file=${encodeURIComponent(file.coverArt)}" alt="Cover" class="file-cover-icon">`;
         } else {
             // Determine icon class based on file type
             const iconClass = file.type === 'directory' ? 'folderIcon' : 
@@ -873,7 +873,7 @@ function updateNowPlaying() {
         
         // Display cover art if available
         if (track.coverArt) {
-            nowPlayingCoverEl.innerHTML = `<img src="api.php?action=play&file=${encodeURIComponent(track.coverArt)}" alt="Cover Art" class="now-playing-cover">`;
+            nowPlayingCoverEl.innerHTML = `<img src="api.php?action=cover&file=${encodeURIComponent(track.coverArt)}" alt="Cover Art" class="now-playing-cover">`;
         } else {
             nowPlayingCoverEl.innerHTML = '<div class="now-playing-cover-placeholder">🎵</div>';
         }
