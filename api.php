@@ -444,6 +444,91 @@ function findCoverArtInDirectory($directoryPath) {
     $namedCoverArts = [];
     $anyImageFiles = [];
     
+    // Look for cover art files in the main directory
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+        
+        $itemPath = $directoryPath . '/' . $item;
+        if (is_file($itemPath)) {
+            $extension = strtolower(pathinfo($item, PATHINFO_EXTENSION));
+            
+            // Check if it's an image file
+            if (in_array($extension, $imageExtensions)) {
+                // Check if it matches cover art naming
+                if (isCoverArt($item)) {
+                    $namedCoverArts[] = $itemPath;
+                } else {
+                    // Store any image file as fallback
+                    $anyImageFiles[] = $itemPath;
+                }
+            }
+        }
+    }
+    
+    // Return named cover art first (prioritized by common names)
+    if (!empty($namedCoverArts)) {
+        // Sort by priority of cover art names
+        usort($namedCoverArts, function($a, $b) use ($coverNames) {
+            $nameA = strtolower(pathinfo($a, PATHINFO_FILENAME));
+            $nameB = strtolower(pathinfo($b, PATHINFO_FILENAME));
+            
+            foreach ($coverNames as $priority => $coverName) {
+                if (strpos($nameA, $coverName) !== false && strpos($nameB, $coverName) === false) {
+                    return -1;
+                }
+                if (strpos($nameB, $coverName) !== false && strpos($nameA, $coverName) === false) {
+                    return 1;
+                }
+            }
+            return 0;
+        });
+        
+        return $namedCoverArts[0];
+    }
+    
+    // If no specific cover art found, return first image file found
+    if (!empty($anyImageFiles)) {
+        return $anyImageFiles[0];
+    }
+    
+    // If no cover art found in main directory, check first-level subdirectories
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+        
+        $itemPath = $directoryPath . '/' . $item;
+        if (is_dir($itemPath)) {
+            // Recursively check subdirectory for cover art
+            $subdirCoverArt = findCoverArtInSubdirectory($itemPath, $coverNames, $imageExtensions);
+            if ($subdirCoverArt !== null) {
+                return $subdirCoverArt;
+            }
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * Find cover art in a subdirectory (first level only)
+ * 
+ * @param string $directoryPath
+ * @param array $coverNames
+ * @param array $imageExtensions
+ * @return string|null
+ */
+function findCoverArtInSubdirectory($directoryPath, $coverNames, $imageExtensions) {
+    // Check if directory exists
+    if (!is_dir($directoryPath)) {
+        return null;
+    }
+    
+    // Get directory contents
+    $items = scandir($directoryPath);
+    
+    // Arrays to store potential cover art files
+    $namedCoverArts = [];
+    $anyImageFiles = [];
+    
     // Look for cover art files
     foreach ($items as $item) {
         if ($item === '.' || $item === '..') continue;
