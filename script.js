@@ -518,7 +518,6 @@ function renderPlaylist() {
                 <span class="itemNumber">${index + 1}.</span>
                 ${iconHTML}
                 <span class="playlistTitle" style="${titleStyle}" onclick="playTrack(${index})">${item.title}</span>
-                <button class="secondary" onclick="removeFromPlaylist(${index})" title="Remove">🗑️</button>
             `;
 
             // Add drag and drop event listeners
@@ -538,32 +537,6 @@ function renderPlaylist() {
     saveToStorage();
 }
 
-/**
- * Remove an item from the playlist
- * @param {number} index - Index of item to remove
- */
-function removeFromPlaylist(index) {
-    // Remove item from playlist array
-    state.playlist.splice(index, 1);
-    playlist = state.playlist;
-
-    // If we removed the currently playing track
-    if (state.currentTrackIndex === index) {
-        state.currentTrackIndex = -1;
-        currentTrackIndex = state.currentTrackIndex;
-        audioPlayer.src = '';
-        isPlaying = false;
-        updatePlayPauseButtons();
-    } 
-    // If we removed a track before the current one, adjust index
-    else if (state.currentTrackIndex > index) {
-        state.currentTrackIndex--;
-        currentTrackIndex = state.currentTrackIndex;
-    }
-
-    renderPlaylist();
-    showNotification('Removed from playlist');
-}
 
 /**
  * Clear the entire playlist
