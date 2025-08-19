@@ -126,6 +126,23 @@
         </footer>
         <!-- Notification element for displaying messages to the user -->
         <div id="notification" class="notification hidden"></div>
+        
+        <!-- Clear Playlist Confirmation Modal -->
+        <dialog id="clearPlaylistModal">
+            <article>
+                <header>
+                    <h3>Clear Playlist</h3>
+                </header>
+                <p>Are you sure you want to clear the entire playlist?</p>
+                <footer>
+                    <div role="group">
+                        <button id="cancelClearBtn" class="secondary">Cancel</button>
+                        <button id="confirmClearBtn" class="contrast">Clear Playlist</button>
+                    </div>
+                </footer>
+            </article>
+        </dialog>
+        
         <!-- Load the main application script -->
         <script src="script.js"></script>
     </body>

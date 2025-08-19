@@ -258,6 +258,18 @@ function setupEventListeners() {
     exportBtn.addEventListener('click', exportPlaylist);
     clearBtn.addEventListener('click', clearPlaylist);
     
+    // Add event listeners for clear playlist modal
+    const confirmClearBtn = document.getElementById('confirmClearBtn');
+    const cancelClearBtn = document.getElementById('cancelClearBtn');
+    
+    if (confirmClearBtn) {
+        confirmClearBtn.addEventListener('click', confirmClearPlaylist);
+    }
+    
+    if (cancelClearBtn) {
+        cancelClearBtn.addEventListener('click', cancelClearPlaylist);
+    }
+    
     // Add event listener for the new "Add All" button
     const addAllBtn = document.getElementById('addAllBtn');
     if (addAllBtn) {
@@ -596,17 +608,44 @@ function clearPlaylist() {
     // Don't do anything if playlist is already empty
     if (playlist.length === 0) return;
 
-    // Confirm with user before clearing
-    if (confirm('Are you sure you want to clear the entire playlist?')) {
-        state.playlist = [];
-        playlist = state.playlist;
-        state.currentTrackIndex = -1;
-        currentTrackIndex = state.currentTrackIndex;
-        audioPlayer.src = '';
-        isPlaying = false;
-        renderPlaylist();
-        updatePlayPauseButtons();
-        showNotification('Playlist cleared');
+    // Show confirmation modal
+    const modal = document.getElementById('clearPlaylistModal');
+    if (modal) {
+        modal.showModal();
+    }
+}
+
+/**
+ * Confirm clearing the playlist
+ * This function is called when the user confirms the clear action
+ */
+function confirmClearPlaylist() {
+    state.playlist = [];
+    playlist = state.playlist;
+    state.currentTrackIndex = -1;
+    currentTrackIndex = state.currentTrackIndex;
+    audioPlayer.src = '';
+    isPlaying = false;
+    renderPlaylist();
+    updatePlayPauseButtons();
+    showNotification('Playlist cleared');
+    
+    // Close the modal
+    const modal = document.getElementById('clearPlaylistModal');
+    if (modal) {
+        modal.close();
+    }
+}
+
+/**
+ * Cancel clearing the playlist
+ * This function is called when the user cancels the clear action
+ */
+function cancelClearPlaylist() {
+    // Close the modal
+    const modal = document.getElementById('clearPlaylistModal');
+    if (modal) {
+        modal.close();
     }
 }
 
