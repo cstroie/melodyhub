@@ -784,6 +784,7 @@ function playPrevious() {
     // Cycle to last track if at beginning
     currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
     state.currentTrackIndex = currentTrackIndex;
+    renderPlaylist(); // Update playlist highlighting
     playAudio();
 }
 
@@ -799,6 +800,7 @@ function playTrack(oneBasedIndex) {
     
     currentTrackIndex = index;
     state.currentTrackIndex = currentTrackIndex;
+    renderPlaylist(); // Update playlist highlighting
     playAudio();
 }
 
@@ -812,6 +814,7 @@ function playNext() {
     // Cycle to first track if at end
     currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
     state.currentTrackIndex = currentTrackIndex;
+    renderPlaylist(); // Update playlist highlighting
     playAudio();
 }
 
