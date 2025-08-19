@@ -521,8 +521,19 @@ function loadPlaylist() {
 /**
  * Check if a file is a cover art file
  * 
- * @param string $filename
- * @return bool
+ * This function determines if a file is likely to be a cover art image
+ * by checking if its name (without extension) contains common cover art keywords.
+ * 
+ * @param string $filename The name of the file to check
+ * @return bool True if the file is identified as cover art, false otherwise
+ * 
+ * The function performs a case-insensitive check against common cover art
+ * naming conventions like 'cover', 'folder', 'album', 'front', 'artwork'.
+ * 
+ * Example:
+ * - isCoverArt('Cover.jpg') returns true
+ * - isCoverArt('folder.png') returns true
+ * - isCoverArt('song.mp3') returns false
  */
 function isCoverArt($filename) {
     $filename = strtolower($filename);
@@ -545,8 +556,16 @@ function isCoverArt($filename) {
 /**
  * Find cover art in a directory
  * 
- * @param string $directoryPath
- * @return string|null
+ * This function searches for cover art images in a directory using a prioritized approach:
+ * 1. First looks for images with common cover art names (cover, folder, album, etc.)
+ * 2. If none found, looks for any image file as a fallback
+ * 3. If still none found, checks first-level subdirectories
+ * 
+ * @param string $directoryPath The absolute path to the directory to search
+ * @return string|null The absolute path to the found cover art, or null if none found
+ * 
+ * The search prioritizes files with specific names over generic image files,
+ * and follows a hierarchy of common cover art naming conventions.
  */
 function findCoverArtInDirectory($directoryPath) {
     $coverNames = ['cover', 'folder', 'album', 'front', 'artwork'];
@@ -631,10 +650,17 @@ function findCoverArtInDirectory($directoryPath) {
 /**
  * Find cover art in a subdirectory (first level only)
  * 
- * @param string $directoryPath
- * @param array $coverNames
- * @param array $imageExtensions
- * @return string|null
+ * This function searches for cover art in a subdirectory using the same
+ * prioritization logic as findCoverArtInDirectory, but only checks one
+ * level deep (the specified subdirectory).
+ * 
+ * @param string $directoryPath The absolute path to the subdirectory to search
+ * @param array $coverNames List of common cover art naming conventions
+ * @param array $imageExtensions List of supported image file extensions
+ * @return string|null The absolute path to the found cover art, or null if none found
+ * 
+ * This is a helper function used by findCoverArtInDirectory to search
+ * within subdirectories when no cover art is found in the main directory.
  */
 function findCoverArtInSubdirectory($directoryPath, $coverNames, $imageExtensions) {
     // Check if directory exists

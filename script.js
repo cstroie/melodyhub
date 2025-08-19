@@ -908,11 +908,19 @@ function pauseAudio() {
 /**
  * Play the previous track in the playlist
  * This function cycles to the previous track or wraps to the end
+ * 
+ * The modulo operation ensures that when we're at the first track (index 0),
+ * we wrap around to the last track in the playlist.
+ * 
+ * Example:
+ * - If currentTrackIndex is 0 and playlist has 5 items, next index will be 4
+ * - If currentTrackIndex is 3 and playlist has 5 items, next index will be 2
  */
 function playPrevious() {
     if (playlist.length === 0) return;
 
     // Cycle to last track if at beginning
+    // The expression (a - 1 + length) % length handles negative results correctly
     currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
     state.currentTrackIndex = currentTrackIndex;
     renderPlaylist(); // Update playlist highlighting
@@ -938,11 +946,19 @@ function playTrack(oneBasedIndex) {
 /**
  * Play the next track in the playlist
  * This function cycles to the next track or wraps to the beginning
+ * 
+ * The modulo operation ensures that when we reach the end of the playlist,
+ * we wrap around to the first track (index 0).
+ * 
+ * Example:
+ * - If currentTrackIndex is 4 and playlist has 5 items, next index will be 0
+ * - If currentTrackIndex is 2 and playlist has 5 items, next index will be 3
  */
 function playNext() {
     if (playlist.length === 0) return;
 
     // Cycle to first track if at end
+    // The expression (a + 1) % length handles wrapping around to 0
     currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
     state.currentTrackIndex = currentTrackIndex;
     renderPlaylist(); // Update playlist highlighting
@@ -1040,7 +1056,16 @@ function updatePlayerControls() {
 /**
  * Format time in seconds to MM:SS format
  * @param {number} seconds - Time in seconds
- * @returns {string} Formatted time string
+ * @returns {string} Formatted time string in MM:SS format
+ * 
+ * This function converts a time value in seconds to a human-readable
+ * minutes and seconds format. It ensures that seconds are always
+ * displayed with two digits (padded with leading zero if needed).
+ * 
+ * Example:
+ * - formatTime(65) returns "1:05"
+ * - formatTime(120) returns "2:00"
+ * - formatTime(30) returns "0:30"
  */
 function formatTime(seconds) {
     const min = Math.floor(seconds / 60);
@@ -1053,6 +1078,15 @@ function formatTime(seconds) {
  * Show a notification message
  * @param {string} message - Message to display
  * @param {string} type - Type of notification ('success' or 'error')
+ * 
+ * This function displays a temporary notification message to the user.
+ * The notification will automatically disappear after 3 seconds.
+ * 
+ * The function updates the notification element's text content and CSS classes:
+ * - For error notifications, it adds the 'error' class for red styling
+ * - For success notifications, it uses the default green styling
+ * - It removes the 'hidden' class to make the notification visible
+ * - After 3 seconds, it adds the 'hidden' class to hide the notification
  */
 function showNotification(message, type = 'success') {
     notificationEl.textContent = message;
