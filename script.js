@@ -509,7 +509,7 @@ function renderPlaylist() {
             // Generate HTML for playlist item
             li.innerHTML = `
                 <span class="itemNumber">${index + 1}.</span>
-                <span class="playlistTitle" style="${titleStyle}" onclick="playTrack(${index})">${item.title}</span>
+                <span class="playlistTitle" style="${titleStyle}" onclick="playTrack(${index + 1})">${item.title}</span>
             `;
 
             // Add drag and drop event listeners
@@ -770,10 +770,13 @@ function playPrevious() {
 }
 
 /**
- * Play a specific track by index
- * @param {number} index - Index of the track to play
+ * Play a specific track by index (1-based indexing)
+ * @param {number} oneBasedIndex - 1-based index of the track to play
  */
-function playTrack(index) {
+function playTrack(oneBasedIndex) {
+    // Convert 1-based index to 0-based index
+    const index = oneBasedIndex - 1;
+    
     if (playlist.length === 0 || index < 0 || index >= playlist.length) return;
     
     currentTrackIndex = index;
