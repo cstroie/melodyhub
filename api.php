@@ -91,6 +91,10 @@ function listDirectory() {
     // Get directory contents
     $items = scandir($fullPath);
     
+    // Initialize files array and cover art variable
+    $files = [];
+    $coverArt = null;
+    
     // Process each item in the directory
     foreach ($items as $item) {
         // Skip current and parent directory references
@@ -114,8 +118,18 @@ function listDirectory() {
             // Define supported audio extensions
             $audioExtensions = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'];
             
+            // Define supported image extensions for cover art
+            $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+            
+            // Check for cover art files
+            if (in_array($extension, $imageExtensions) && isCoverArt($item)) {
+                // Store the first cover art found
+                if ($coverArt === null) {
+                    $coverArt = $relativePath;
+                }
+            }
             // Only include audio files and playlist files
-            if (in_array($extension, $audioExtensions) || in_array($extension, ['m3u', 'm3u8', 'pls'])) {
+            else if (in_array($extension, $audioExtensions) || in_array($extension, ['m3u', 'm3u8', 'pls'])) {
                 $files[] = [
                     'name' => $item,
                     'type' => 'file',
@@ -124,6 +138,16 @@ function listDirectory() {
                 ];
             }
         }
+    }
+    
+    // Add cover art to each file entry if found
+    if ($coverArt !== null) {
+        foreach ($files as &$file) {
+            $file['coverArt'] = $coverArt;
+        }
+        $response = ['files' => $files, 'coverArt' => $coverArt];
+    } else {
+        $response = ['files' => $files];
     }
     
     // Sort items: directories first, then files, both alphabetically
@@ -137,7 +161,7 @@ function listDirectory() {
     });
     
     // Return JSON response with file list
-    echo json_encode(['files' => $files]);
+    echo json_encode($response);
 }
 
 /**
@@ -240,10 +264,20 @@ function getDirectoryFiles() {
             if (in_array($extension, $audioExtensions)) {
                 // Get relative path from base path
                 $relativePath = substr($file->getPathname(), strlen(realpath($basePath)) + 1);
+                $dirPath = dirname($relativePath);
+                
+                // Find cover art for this file's directory
+                $coverArt = findCoverArtInDirectory(dirname($file->getPathname()));
+                if ($coverArt) {
+                    // Convert to relative path
+                    $coverArt = substr($coverArt, strlen(realpath($basePath)) + 1);
+                }
+                
                 $files[] = [
                     'name' => $file->getFilename(),
                     'path' => $relativePath,
-                    'extension' => $extension
+                    'extension' => $extension,
+                    'coverArt' => $coverArt
                 ];
             }
         }
@@ -291,6 +325,13 @@ function loadPlaylist() {
     // Initialize array to hold playlist entries
     $files = [];
     
+    // Find cover art in the same directory as the playlist
+    $coverArt = findCoverArtInDirectory(dirname($fullPath));
+    if ($coverArt) {
+        // Convert to relative path
+        $coverArt = substr($coverArt, strlen(realpath($basePath)) + 1);
+    }
+    
     // Parse M3U/M3U8 playlist files
     if ($extension === 'm3u' || $extension === 'm3u8') {
         // Read entire file content
@@ -308,7 +349,8 @@ function loadPlaylist() {
                 $filePath = dirname($file) . '/' . $line;
                 $files[] = [
                     'path' => $filePath,
-                    'title' => basename($line)
+                    'title' => basename($line),
+                    'coverArt' => $coverArt
                 ];
             }
         }
@@ -329,7 +371,8 @@ function loadPlaylist() {
                 $filePath = dirname($file) . '/' . $matches[1];
                 $files[] = [
                     'path' => $filePath,
-                    'title' => basename($matches[1])
+                    'title' => basename($matches[1]),
+                    'coverArt' => $coverArt
                 ];
             }
         }
@@ -342,5 +385,79 @@ function loadPlaylist() {
     
     // Return JSON response with playlist contents
     echo json_encode(['files' => $files]);
+}
+
+/**
+ * Check if a file is a cover art file
+ * 
+ * @param string $filename
+ * @return bool
+ */
+function isCoverArt($filename) {
+    $filename = strtolower($filename);
+    $coverNames = ['cover', 'folder', 'album', 'front', 'artwork'];
+    $extension = pathinfo($filename, PATHINFO_EXTENSION);
+    
+    // Remove extension for name checking
+    $nameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
+    
+    // Check if filename matches common cover art names
+    foreach ($coverNames as $coverName) {
+        if (strpos($nameWithoutExt, $coverName) !== false) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Find cover art in a directory
+ * 
+ * @param string $directoryPath
+ * @return string|null
+ */
+function findCoverArtInDirectory($directoryPath) {
+    $coverNames = ['cover', 'folder', 'album', 'front', 'artwork'];
+    $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+    
+    // Check if directory exists
+    if (!is_dir($directoryPath)) {
+        return null;
+    }
+    
+    // Get directory contents
+    $items = scandir($directoryPath);
+    
+    // Look for cover art files
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+        
+        $itemPath = $directoryPath . '/' . $item;
+        if (is_file($itemPath)) {
+            $extension = strtolower(pathinfo($item, PATHINFO_EXTENSION));
+            $nameWithoutExt = strtolower(pathinfo($item, PATHINFO_FILENAME));
+            
+            // Check if it's an image file and matches cover art naming
+            if (in_array($extension, $imageExtensions) && isCoverArt($item)) {
+                return $itemPath;
+            }
+        }
+    }
+    
+    // If no specific cover art found, look for any image file
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+        
+        $itemPath = $directoryPath . '/' . $item;
+        if (is_file($itemPath)) {
+            $extension = strtolower(pathinfo($item, PATHINFO_EXTENSION));
+            if (in_array($extension, $imageExtensions)) {
+                return $itemPath;
+            }
+        }
+    }
+    
+    return null;
 }
 ?>
