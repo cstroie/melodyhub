@@ -344,7 +344,7 @@ function renderFileList(files) {
         
         li.innerHTML = `
             ${iconHTML}
-            <span class="fileName" style="cursor: pointer;" ${file.type === 'directory' ? `onclick="loadDirectory('${escapedFullPath}')"` : `onclick="handleFileClick('${escapedFileName}', '${file.extension}')" title="Add to playlist"`}>${file.name}</span>
+            <span class="fileName" style="cursor: pointer;" ${file.type === 'directory' ? `onclick="loadDirectory('${escapedFullPath}')" ondblclick="addDirectoryToPlaylist('${jsSafePath}'); event.stopPropagation();"` : `onclick="handleFileClick('${escapedFileName}', '${file.extension}')" title="Add to playlist"`}>${file.name}</span>
                 ${file.type === 'directory' ? 
                     `<button class="outline" onclick="addDirectoryToPlaylist('${jsSafePath}')" title="Add All">➕➕</button>` : 
                     `<button class="outline secondary" onclick="addToPlaylist('${escapedFileName}', '${file.extension}')" title="Add">➕</button>`
