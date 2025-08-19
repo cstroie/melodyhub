@@ -8,14 +8,18 @@ A responsive web-based audio player that allows browsing local directories, mana
 - **Audio Playback**: Play MP3, WAV, OGG, FLAC, M4A, and AAC files
 - **Playlist Management**:
   - Add individual audio files to playlist
+  - Add entire directories to playlist
   - Add entire playlists (M3U, M3U8, PLS formats)
-  - Remove individual items
+  - Import/export playlists
   - Clear entire playlist
+  - Drag and drop reordering
 - **Player Controls**:
   - Play/Pause
   - Next/Previous track
   - Progress bar with seeking
   - Volume control
+- **Cover Art Display**: Automatically detects and displays album artwork
+- **Persistent Storage**: Playlist saved in browser's localStorage
 - **Responsive Design**: Works on desktop and mobile devices
 
 ## Requirements
@@ -50,27 +54,33 @@ The application uses the following PHP endpoints:
 - `api.php?action=list&path=PATH` - List directory contents
 - `api.php?action=play&file=FILE` - Play an audio file
 - `api.php?action=loadPlaylist&path=PATH` - Load a playlist file
+- `api.php?action=getDirectoryFiles&path=PATH` - Get all audio files from a directory recursively
 
 ## Usage
 
 1. **Browsing Files**:
    - Use the directory browser panel to navigate through your audio files
-   - Click "Open" on folders to enter them
+   - Click on folder names to enter them
    - Use the breadcrumb navigation to go back to parent directories
+   - Click "Add All Files in Current Directory" to add all audio files from the current directory
 
 2. **Adding to Playlist**:
-   - Click "Add" next to audio files to add them to the playlist
-   - Click "Add" next to playlist files (M3U, M3U8, PLS) to add all contained files
+   - Click "➕" next to audio files to add them to the playlist
+   - Click "➕➕" next to directories to add all audio files from that directory
+   - Click on playlist files (M3U, M3U8, PLS) to add all contained files
 
 3. **Managing Playlist**:
-   - Click "Remove" to delete individual items
-   - Use "Clear Playlist" to remove all items
+   - Drag and drop playlist items to reorder them
+   - Use "Import" to load a playlist from a file
+   - Use "Export" to save your current playlist to a file
+   - Use "Clear" to remove all items from the playlist
 
 4. **Playing Audio**:
-   - Click the "Play" button to start playback
+   - Click the "▶" button to start playback
    - Use the progress bar to seek within the current track
    - Adjust volume with the slider
    - Use Next/Previous buttons to navigate between tracks
+   - Click on any playlist item to play that specific track
 
 ## Security Notes
 
@@ -82,6 +92,17 @@ The application uses the following PHP endpoints:
 
 - **Audio Files**: MP3, WAV, OGG, FLAC, M4A, AAC
 - **Playlist Files**: M3U, M3U8, PLS
+
+## Cover Art Detection
+
+The application automatically detects cover art in directories. It looks for files with these names (case insensitive):
+- cover.*
+- folder.*
+- album.*
+- front.*
+- artwork.*
+
+Supported image formats: JPG, JPEG, PNG, GIF, BMP
 
 ## Browser Support
 
