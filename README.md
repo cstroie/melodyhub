@@ -1,6 +1,6 @@
 # MelodyHub
 
-A responsive web-based audio player that allows browsing local directories, managing playlists, and playing audio files.
+A web-based audio player with directory browsing, playlist management, and cover art display. Features include drag-and-drop reordering, import/export playlists, and responsive design. Supports MP3, WAV, OGG, FLAC, M4A, AAC files.
 
 ## Features
 
@@ -8,7 +8,7 @@ A responsive web-based audio player that allows browsing local directories, mana
 - **Audio Playback**: Play MP3, WAV, OGG, FLAC, M4A, and AAC files
 - **Playlist Management**:
   - Add individual audio files to playlist
-  - Add entire directories to playlist
+  - Add entire directories to playlist (non-recursive)
   - Add entire playlists (M3U, M3U8, PLS formats)
   - Import/export playlists
   - Clear entire playlist
@@ -63,10 +63,11 @@ The application uses the following PHP endpoints:
    - Click on folder names to enter them
    - Use the breadcrumb navigation to go back to parent directories
    - Click "Add All Files in Current Directory" to add all audio files from the current directory
+   - Double-click on directory names to add all audio files from that directory to the playlist
 
 2. **Adding to Playlist**:
-   - Click "➕" next to audio files to add them to the playlist
-   - Click "➕➕" next to directories to add all audio files from that directory
+   - Click on audio files to add them to the playlist
+   - Double-click on directories to add all audio files from that directory
    - Click on playlist files (M3U, M3U8, PLS) to add all contained files
 
 3. **Managing Playlist**:

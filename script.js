@@ -1,8 +1,17 @@
 /**
- * Audio Player Application
+ * MelodyHub Audio Player
  * 
- * This is the main JavaScript application for the audio player.
- * It handles UI interactions, playlist management, and audio playback.
+ * Main JavaScript application for the audio player.
+ * Handles UI interactions, playlist management, and audio playback.
+ * 
+ * Features:
+ * - Directory browsing with breadcrumb navigation
+ * - Playlist management with drag-and-drop reordering
+ * - Audio playback controls (play, pause, next, previous)
+ * - Progress bar with seeking
+ * - Volume control
+ * - Cover art display
+ * - Playlist import/export
  */
 
 // === LOGGING FUNCTIONS ===

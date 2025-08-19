@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <!--
- * MelodyHub - Audio Player
+ * MelodyHub - Web-based Audio Player
+ *
+ * A responsive web-based audio player that allows browsing local directories,
+ * managing playlists, and playing audio files with cover art display.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -2,6 +2,10 @@
 /**
  * MelodyHub - Audio Player API
  *
+ * Backend API for the MelodyHub audio player web application.
+ * Handles directory listing, audio file streaming, cover art serving, 
+ * and playlist loading with security checks.
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
