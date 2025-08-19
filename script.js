@@ -87,18 +87,30 @@ function loadFromStorage() {
     
     if (savedPlaylist) {
         try {
-            state.playlist = JSON.parse(savedPlaylist);
-            playlist = state.playlist;
-            logInfo(`Loaded playlist with ${state.playlist.length} items from storage`);
+            const parsedPlaylist = JSON.parse(savedPlaylist);
+            if (Array.isArray(parsedPlaylist)) {
+                state.playlist = parsedPlaylist;
+                playlist = state.playlist;
+                logInfo(`Loaded playlist with ${state.playlist.length} items from storage`);
+            } else {
+                logWarning('Saved playlist is not an array, initializing empty playlist');
+                state.playlist = [];
+                playlist = state.playlist;
+            }
         } catch (e) {
             logError('Failed to parse saved playlist:', e);
+            state.playlist = [];
+            playlist = state.playlist;
         }
     }
     
     if (savedTrackIndex !== null) {
-        state.currentTrackIndex = parseInt(savedTrackIndex);
-        currentTrackIndex = state.currentTrackIndex;
-        logDebug(`Current track index set to ${state.currentTrackIndex}`);
+        const index = parseInt(savedTrackIndex);
+        if (!isNaN(index) && index >= -1) {
+            state.currentTrackIndex = index;
+            currentTrackIndex = state.currentTrackIndex;
+            logDebug(`Current track index set to ${state.currentTrackIndex}`);
+        }
     }
     
     if (savedPath !== null) {
@@ -108,8 +120,11 @@ function loadFromStorage() {
     }
     
     if (savedVolume !== null) {
-        state.volume = parseFloat(savedVolume);
-        logDebug(`Volume set to ${state.volume}`);
+        const volume = parseFloat(savedVolume);
+        if (!isNaN(volume) && volume >= 0 && volume <= 1) {
+            state.volume = volume;
+            logDebug(`Volume set to ${state.volume}`);
+        }
     }
 }
 
@@ -399,17 +414,22 @@ function addToPlaylist(filename, extension) {
                     return;
                 }
                 // Add each file in the playlist to our playlist
-                data.files.forEach(file => {
-                    state.playlist.push({
-                        title: file.title || file.path.split('/').pop(),
-                        path: file.path,
-                        coverArt: file.coverArt || null
+                if (Array.isArray(data.files)) {
+                    data.files.forEach(file => {
+                        state.playlist.push({
+                            title: file.title || file.path.split('/').pop(),
+                            path: file.path,
+                            coverArt: file.coverArt || null
+                        });
                     });
-                });
-                playlist = state.playlist;
-                logInfo(`Added ${data.files.length} tracks from playlist`);
-                renderPlaylist();
-                showNotification(`Added ${data.files.length} tracks from playlist`);
+                    playlist = state.playlist;
+                    logInfo(`Added ${data.files.length} tracks from playlist`);
+                    renderPlaylist();
+                    showNotification(`Added ${data.files.length} tracks from playlist`);
+                } else {
+                    logError('Invalid playlist data format');
+                    showNotification('Error: Invalid playlist format', 'error');
+                }
             })
             .catch(error => {
                 logError('Network error loading playlist:', error);
@@ -421,7 +441,12 @@ function addToPlaylist(filename, extension) {
         
         // Try to find cover art for this file's directory
         fetch(`api.php?action=list&path=${encodeURIComponent(currentPath)}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 const coverArt = data.coverArt || null;
                 state.playlist.push({
@@ -591,6 +616,13 @@ function importPlaylist() {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Check file extension
+        const extension = file.name.split('.').pop().toLowerCase();
+        if (!PLAYLIST_EXTENSIONS.includes(extension)) {
+            showNotification('Please select a valid playlist file (M3U, M3U8, or PLS)', 'error');
+            return;
+        }
+
         // Read the file content
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -600,21 +632,26 @@ function importPlaylist() {
                 const lines = content.split('\n').filter(line => line.trim() !== '' && !line.startsWith('#'));
 
                 // Add each line as a playlist item
+                let trackCount = 0;
                 lines.forEach(line => {
                     if (line.trim()) {
                         state.playlist.push({
                             title: line.split('/').pop(),
                             path: line.trim()
                         });
+                        trackCount++;
                     }
                 });
                 playlist = state.playlist;
 
                 renderPlaylist();
-                showNotification(`Imported ${lines.length} tracks`);
+                showNotification(`Imported ${trackCount} tracks`);
             } catch (error) {
                 showNotification('Error importing playlist: ' + error.message, 'error');
             }
+        };
+        reader.onerror = function() {
+            showNotification('Error reading file', 'error');
         };
         reader.readAsText(file);
     };
