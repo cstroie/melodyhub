@@ -33,7 +33,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
     <body>
-                
         <main>
             <!-- Audio player controls section -->
             <section class="player-section">
