@@ -35,55 +35,6 @@
             <h1>MelodyHub</h1>
             <p>Browse, manage, and play your audio files</p>
         </header>
-        
-        <style>
-            /* Cover art styles */
-            .now-playing-cover {
-                width: 100px;
-                height: 100px;
-                object-fit: cover;
-                border-radius: 8px;
-                margin-right: 15px;
-                float: left;
-            }
-            
-            .now-playing-cover-placeholder {
-                width: 100px;
-                height: 100px;
-                font-size: 60px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 15px;
-                float: left;
-            }
-            
-            .file-cover-icon {
-                width: 24px;
-                height: 24px;
-                object-fit: cover;
-                margin-right: 8px;
-                vertical-align: middle;
-            }
-            
-            .playlist-cover-icon {
-                width: 24px;
-                height: 24px;
-                object-fit: cover;
-                margin-right: 8px;
-                vertical-align: middle;
-            }
-            
-            .playlist-icon {
-                font-size: 20px;
-                margin-right: 8px;
-                vertical-align: middle;
-            }
-            
-            #nowPlaying {
-                overflow: hidden;
-            }
-        </style>
                 
         <main>
             <!-- Audio player controls section -->
