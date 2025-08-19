@@ -120,4 +120,4 @@ Costin Stroie <costinstroie@eridu.eu.org>
 
 ## License
 
-This project is open source and available under the MIT License.
+This project is open source and available under the GPLv3 License.
