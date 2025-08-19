@@ -79,35 +79,41 @@
             <section class="grid">
                 <!-- Directory browser section -->
                 <article>
+<header>
                     <h3>Directory Browser</h3>
                     <!-- Breadcrumb navigation showing current path -->
                     <nav aria-label="breadcrumb" id="breadcrumb">
                         <!-- Breadcrumb will be populated by JavaScript -->
                     </nav>
+</header>
                     <!-- List of files in the current directory -->
                     <ul class="fileList" id="fileList">
                         <!-- File list will be populated by JavaScript -->
                     </ul>
                     <!-- Button to add all files in current directory to playlist -->
-                    <div role="group">
+                    <footer><div role="group">
                         <button class="secondary" id="addAllBtn">Add All Files in Current Directory</button>
-                    </div>
+                    </div></footer>
                 </article>
                 
                 <!-- Playlist section -->
                 <article>
+<header>
                     <h3>Playlist</h3>
+</header>
                     <!-- List of tracks in the current playlist -->
                     <ul class="playList" id="playList">
                         <!-- Playlist items will be populated by JavaScript -->
                         <p id="emptyPlaylistMessage">Your playlist is empty. Add some audio files!</p>
                     </ul>
                     <!-- Playlist management buttons -->
-                    <div role="group">
+                    <footer>
+                      <div role="group">
                         <button id="importBtn">Import</button>
                         <button id="exportBtn">Export</button>
                         <button id="clearBtn" type="reset">Clear</button>
-                    </div>
+                      </div>
+                    </footer>
                 </article>
             </section>
         </main>
