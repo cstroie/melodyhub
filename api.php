@@ -91,9 +91,9 @@ function listDirectory() {
     // Get directory contents
     $items = scandir($fullPath);
     
-    // Initialize files array and cover art variable
+    // Initialize files array
     $files = [];
-    $coverArt = null;
+    $coverArt = null; // Cover art for current directory files
     
     // Process each item in the directory
     foreach ($items as $item) {
@@ -107,17 +107,17 @@ function listDirectory() {
         // Check if item is a directory
         if (is_dir($itemPath)) {
             // For directories, check if they contain audio files and look for cover art
-            $coverArt = findCoverArtInDirectory($itemPath);
-            if ($coverArt) {
+            $dirCoverArt = findCoverArtInDirectory($itemPath);
+            if ($dirCoverArt) {
                 // Convert to relative path
-                $coverArt = substr($coverArt, strlen(realpath($basePath)) + 1);
+                $dirCoverArt = substr($dirCoverArt, strlen(realpath($basePath)) + 1);
             }
                 
             $files[] = [
                 'name' => $item,
                 'type' => 'directory',
                 'path' => $relativePath,
-                'coverArt' => $coverArt
+                'coverArt' => $dirCoverArt
             ];
         } else {
             // For files, extract extension for type identification
@@ -151,7 +151,10 @@ function listDirectory() {
     // Add cover art to each file entry if found
     if ($coverArt !== null) {
         foreach ($files as &$file) {
-            $file['coverArt'] = $coverArt;
+            // Only add cover art to file entries, not directories (they already have their own)
+            if ($file['type'] !== 'directory') {
+                $file['coverArt'] = $coverArt;
+            }
         }
         $response = ['files' => $files, 'coverArt' => $coverArt];
     } else {
