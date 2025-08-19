@@ -509,6 +509,12 @@ function renderPlaylist() {
     // Clear the playlist container first
     playlistItemsEl.innerHTML = '';
 
+    // Update playlist count in header
+    const playlistCountEl = document.getElementById('playlistCount');
+    if (playlistCountEl) {
+        playlistCountEl.textContent = playlist.length;
+    }
+
     // If playlist is empty, show the empty message
     if (playlist.length === 0) {
         playlistItemsEl.innerHTML = '<p id="emptyPlaylistMessage">Your playlist is empty. Add some audio files!</p>';

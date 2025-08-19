@@ -99,7 +99,7 @@
                 <!-- Playlist section -->
                 <article>
                     <header>
-                        <h3>Playlist</h3>
+                        <h3>Playlist (<span id="playlistCount">0</span> items)</h3>
                     </header>
                     <!-- List of tracks in the current playlist -->
                     <ul class="playList" id="playList">
