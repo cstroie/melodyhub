@@ -72,35 +72,31 @@
 
             <!-- Main content area with directory browser and playlist -->
             <section class="grid">
-            
-            <!-- Footer with application name and description -->
-            <footer>
-                <p><strong>MelodyHub</strong> - Browse, manage, and play your audio files</p>
-            </footer>
                 <!-- Directory browser section -->
                 <article>
-<header>
-                    <h3>Directory Browser</h3>
-                    <!-- Breadcrumb navigation showing current path -->
-                    <nav aria-label="breadcrumb" id="breadcrumb">
-                        <!-- Breadcrumb will be populated by JavaScript -->
-                    </nav>
-</header>
+                    <header>
+                        <h3>Directory Browser</h3>
+                        <!-- Breadcrumb navigation showing current path -->
+                        <nav aria-label="breadcrumb" id="breadcrumb">
+                            <!-- Breadcrumb will be populated by JavaScript -->
+                        </nav>
+                    </header>
                     <!-- List of files in the current directory -->
                     <ul class="fileList" id="fileList">
                         <!-- File list will be populated by JavaScript -->
                     </ul>
                     <!-- Button to add all files in current directory to playlist -->
-                    <footer><div role="group">
-                        <button class="secondary" id="addAllBtn">Add All Files in Current Directory</button>
-                    </div></footer>
+                    <footer>
+                        <div role="group">
+                            <button class="secondary" id="addAllBtn">Add All Files in Current Directory</button>
+                        </div>
+                    </footer>
                 </article>
-                
                 <!-- Playlist section -->
                 <article>
-<header>
-                    <h3>Playlist</h3>
-</header>
+                    <header>
+                        <h3>Playlist</h3>
+                    </header>
                     <!-- List of tracks in the current playlist -->
                     <ul class="playList" id="playList">
                         <!-- Playlist items will be populated by JavaScript -->
@@ -117,10 +113,12 @@
                 </article>
             </section>
         </main>
-
+        <!-- Footer with application name and description -->
+        <footer>
+            <p><strong>MelodyHub</strong> - Browse, manage, and play your audio files</p>
+        </footer>
         <!-- Notification element for displaying messages to the user -->
         <div id="notification" class="notification hidden"></div>
-
         <!-- Load the main application script -->
         <script src="script.js"></script>
     </body>
