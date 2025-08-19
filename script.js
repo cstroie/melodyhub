@@ -506,17 +506,9 @@ function renderPlaylist() {
             const isCurrentTrack = index === currentTrackIndex;
             const titleStyle = isCurrentTrack ? 'cursor: pointer; color: #ffeb3b; font-weight: bold;' : 'cursor: pointer;';
 
-            // Determine icon based on cover art
-            let iconHTML = '';
-            if (item.coverArt) {
-                // Use cover art as icon
-                iconHTML = `<img src="api.php?action=play&file=${encodeURIComponent(item.coverArt)}" alt="Cover" class="playlist-cover-icon">`;
-            }
-
             // Generate HTML for playlist item
             li.innerHTML = `
                 <span class="itemNumber">${index + 1}.</span>
-                ${iconHTML}
                 <span class="playlistTitle" style="${titleStyle}" onclick="playTrack(${index})">${item.title}</span>
             `;
 
