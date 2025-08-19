@@ -89,7 +89,7 @@
                         </nav>
                     </header>
                     <!-- List of files in the current directory -->
-                    <ul class="fileList" id="fileList">
+                    <ul class="fileList" id="fileList" aria-busy="false">
                         <!-- File list will be populated by JavaScript -->
                     </ul>
                     <!-- Button to add all files in current directory to playlist -->
@@ -105,7 +105,7 @@
                         <h3>Playlist (<span id="playlistCount">0</span> items)</h3>
                     </header>
                     <!-- List of tracks in the current playlist -->
-                    <ul class="playList" id="playList">
+                    <ul class="playList" id="playList" aria-busy="false">
                         <!-- Playlist items will be populated by JavaScript -->
                         <p id="emptyPlaylistMessage">Your playlist is empty. Add some audio files!</p>
                     </ul>

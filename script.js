@@ -292,6 +292,11 @@ function loadDirectory(path) {
     currentPath = path;
     updateBreadcrumb();
 
+    // Set aria-busy attribute to indicate loading
+    if (fileListEl) {
+        fileListEl.setAttribute('aria-busy', 'true');
+    }
+
     // Fetch directory contents from API
     fetch(`api.php?action=list&path=${encodeURIComponent(path)}`)
         .then(response => {
@@ -312,6 +317,12 @@ function loadDirectory(path) {
         .catch(error => {
             logError('Network error loading directory:', error);
             showNotification('Error loading directory: ' + error.message, 'error');
+        })
+        .finally(() => {
+            // Remove aria-busy attribute when loading is complete
+            if (fileListEl) {
+                fileListEl.setAttribute('aria-busy', 'false');
+            }
         });
 }
 
@@ -552,6 +563,11 @@ function saveToStorage() {
  * This function updates the visual representation of the playlist
  */
 function renderPlaylist() {
+    // Set aria-busy attribute to indicate loading
+    if (playlistItemsEl) {
+        playlistItemsEl.setAttribute('aria-busy', 'true');
+    }
+
     // Clear the playlist container first
     playlistItemsEl.innerHTML = '';
 
@@ -597,6 +613,11 @@ function renderPlaylist() {
     
     // Save to localStorage
     saveToStorage();
+    
+    // Remove aria-busy attribute when loading is complete
+    if (playlistItemsEl) {
+        playlistItemsEl.setAttribute('aria-busy', 'false');
+    }
 }
 
 
