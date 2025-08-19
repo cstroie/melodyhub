@@ -344,7 +344,7 @@ function renderFileList(files) {
         
         li.innerHTML = `
             ${iconHTML}
-            <span class="fileName" style="cursor: pointer;" ${file.type === 'directory' ? `onclick="loadDirectory('${escapedFullPath}')"` : `onclick="addToPlaylist('${escapedFileName}', '${file.extension}')" title="Add to playlist"`}>${file.name}</span>
+            <span class="fileName" style="cursor: pointer;" ${file.type === 'directory' ? `onclick="loadDirectory('${escapedFullPath}')"` : `onclick="handleFileClick('${escapedFileName}', '${file.extension}')" title="Add to playlist"`}>${file.name}</span>
                 ${file.type === 'directory' ? 
                     `<button class="outline" onclick="addDirectoryToPlaylist('${jsSafePath}')" title="Add All">➕➕</button>` : 
                     `<button class="outline secondary" onclick="addToPlaylist('${escapedFileName}', '${file.extension}')" title="Add">➕</button>`
@@ -353,6 +353,28 @@ function renderFileList(files) {
 
         fileListEl.appendChild(li);
     });
+}
+
+/**
+ * Handle file name click in the file list
+ * @param {string} filename - Name of the file
+ * @param {string} extension - File extension
+ */
+function handleFileClick(filename, extension) {
+    // If it's an audio file, add it to playlist
+    if (AUDIO_EXTENSIONS.includes(extension)) {
+        addToPlaylist(filename, extension);
+    } 
+    // If it's a directory, navigate into it
+    else if (extension === '') { // Directories don't have extensions
+        const fullPath = currentPath ? currentPath + '/' + filename : filename;
+        const escapedFullPath = fullPath.replace(/'/g, "\\'");
+        loadDirectory(escapedFullPath);
+    }
+    // If it's a playlist file, add it to playlist
+    else if (PLAYLIST_EXTENSIONS.includes(extension)) {
+        addToPlaylist(filename, extension);
+    }
 }
 
 // === PLAYLIST MANAGEMENT FUNCTIONS ===
