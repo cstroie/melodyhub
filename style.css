@@ -212,9 +212,7 @@ header h1 {
 }
 
 .player-section > div[role="group"] {
-  display: flex;
   justify-content: center;
-  gap: 0.5rem;
   margin: 1rem 0;
 }
 
@@ -243,12 +241,12 @@ header h1 {
   
   .fileList li {
     padding: 0.4rem;
-    grid-template-columns: 1.2rem 1fr;
+    grid-template-columns: 1.5rem 1fr;
   }
   
   .playList li {
     padding: 0.4rem;
-    grid-template-columns: 1.5rem 1fr;
+    grid-template-columns: 3rem 1fr;
   }
   
   .now-playing-cover, .now-playing-cover-placeholder {
